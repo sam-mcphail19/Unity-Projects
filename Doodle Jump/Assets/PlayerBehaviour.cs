@@ -5,42 +5,44 @@ using UnityEngine;
 public class PlayerBehaviour : MonoBehaviour
 {
 
-    private Rigidbody2D body;
-    private SpriteRenderer sprite;
+    private Rigidbody body;
+    private Collider player_collider;
 
     public float xSpeed = 1000.0f;
     public float jumpSpeed = 100.0f;
 
     private void Start()
     {
-        body = GetComponent<Rigidbody2D>();
-        sprite = GetComponent<SpriteRenderer>();
+        body = GetComponent<Rigidbody>();
+        player_collider = GetComponent<Collider>();
     }
 
-    void Update()
+    void FixedUpdate()
     {
-        float translation = Input.GetAxis("Horizontal") * xSpeed * Time.deltaTime;
-        body.velocity = new Vector2(translation, body.velocity.y);
+        float translation = Input.GetAxis("Horizontal") * xSpeed * Time.fixedDeltaTime;
+        body.velocity = new Vector3(translation, body.velocity.y);
 
-        if (body.position.x + sprite.bounds.extents.x < -5)
+        if (body.position.x + player_collider.bounds.extents.x < -5)
         {
-            body.position = new Vector2(5, body.position.y);
+            body.position = new Vector3(5, body.position.y);
         }
         else if (body.position.x > 5)
         {
-            body.position = new Vector2(-5 - sprite.bounds.extents.x, body.position.y);
+            body.position = new Vector3(-5 - player_collider.bounds.extents.x, body.position.y);
         }
 
     }
 
-    void OnCollisionEnter2D(Collision2D col)
+    void OnTriggerEnter(Collider col)
     {
-        float bottom = body.position.y - sprite.bounds.extents.y;
 
-        // Only jump when we're moving downwards, and not from the side
-        if (body.velocity.y <= 0 && bottom >= col.rigidbody.position.y)
+        RaycastHit hit;
+        Ray downRay = new Ray(body.transform.position, Vector3.down);
+
+        // Only jump when we're moving downwards, and the cloud is below us
+        if (body.velocity.y <= 0 && Physics.Raycast(downRay, out hit, 0.5f))
         {
-            body.velocity = new Vector2(body.velocity.x, jumpSpeed * Time.deltaTime);
+            body.velocity = new Vector3(body.velocity.x, jumpSpeed * Time.deltaTime);
         }
     }
 
