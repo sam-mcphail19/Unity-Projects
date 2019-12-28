@@ -55,9 +55,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\DeleteItems.cs" />
-     <Compile Include="Assets\FollowPlayer.cs" />
-     <Compile Include="Assets\PlayerBehaviour.cs" />
+     <Compile Include="Assets\Scripts\CloudSpawner.cs" />
+     <Compile Include="Assets\Scripts\DeleteItems.cs" />
+     <Compile Include="Assets\Scripts\FollowPlayer.cs" />
+     <Compile Include="Assets\Scripts\PlayerBehaviour.cs" />
  <Reference Include="Unity.Timeline.Editor">
  <HintPath>D:/Unity-Projects/Doodle Jump/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
  </Reference>

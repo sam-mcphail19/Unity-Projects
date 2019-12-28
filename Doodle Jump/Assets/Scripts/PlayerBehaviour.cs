@@ -8,8 +8,8 @@ public class PlayerBehaviour : MonoBehaviour
     private Rigidbody body;
     private Collider player_collider;
 
-    public float xSpeed = 1000.0f;
-    public float jumpSpeed = 100.0f;
+    public float xSpeed = 250f;
+    public float jumpSpeed = 400f;
 
     private void Start()
     {
@@ -17,7 +17,7 @@ public class PlayerBehaviour : MonoBehaviour
         player_collider = GetComponent<Collider>();
     }
 
-    void FixedUpdate()
+    void Update()
     {
         float translation = Input.GetAxis("Horizontal") * xSpeed * Time.fixedDeltaTime;
         body.velocity = new Vector3(translation, body.velocity.y);
