@@ -564,6 +564,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1937478638}
   - component: {fileID: 1937478639}
+  - component: {fileID: 1937478640}
   m_Layer: 0
   m_Name: Game Manager
   m_TagString: Untagged
@@ -598,8 +599,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 1989834681}
-  cloudPrefab: {fileID: 2747098278233213133, guid: 5976a6a680ed02448b89bd02c2b96226,
+  cloudPrefab: {fileID: 2747098278233213133, guid: d46e22f65f72d2c458931f2abf360f48,
     type: 3}
+--- !u!114 &1937478640
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1937478637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50841a3dd9a90ef45a249296f846fddc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 1989834681}
+  camera: {fileID: 519420028}
 --- !u!1 &1965510907
 GameObject:
   m_ObjectHideFlags: 0

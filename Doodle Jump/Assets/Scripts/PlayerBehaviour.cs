@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerBehaviour : MonoBehaviour
 {
@@ -35,7 +36,6 @@ public class PlayerBehaviour : MonoBehaviour
 
     void OnTriggerEnter(Collider col)
     {
-
         RaycastHit hit;
         Ray downRay = new Ray(body.transform.position, Vector3.down);
 
@@ -44,6 +44,11 @@ public class PlayerBehaviour : MonoBehaviour
         {
             body.velocity = new Vector3(body.velocity.x, jumpSpeed * Time.deltaTime);
         }
+    }
+
+    public void endGame() 
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
 }

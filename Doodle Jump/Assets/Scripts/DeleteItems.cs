@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class DeleteItems : MonoBehaviour
 {
-
     private Collider delete;
 
     void Start()
@@ -14,7 +13,14 @@ public class DeleteItems : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        Destroy(other.gameObject);
+        if (other.tag == "Player")
+        {
+            other.gameObject.GetComponent<PlayerBehaviour>().endGame();
+        }
+        else 
+        {
+            Destroy(other.gameObject);
+        }
     }
 
 }
