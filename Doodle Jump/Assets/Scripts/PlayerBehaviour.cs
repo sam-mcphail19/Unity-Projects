@@ -9,6 +9,8 @@ public class PlayerBehaviour : MonoBehaviour
     private Rigidbody body;
     private Collider player_collider;
 
+    private float wrapDistance = 5;
+
     public float xSpeed = 250f;
     public float jumpSpeed = 400f;
 
@@ -23,13 +25,13 @@ public class PlayerBehaviour : MonoBehaviour
         float translation = Input.GetAxis("Horizontal") * xSpeed * Time.fixedDeltaTime;
         body.velocity = new Vector3(translation, body.velocity.y);
 
-        if (body.position.x + player_collider.bounds.extents.x < -5)
+        if (body.position.x + player_collider.bounds.extents.x < -wrapDistance)
         {
-            body.position = new Vector3(5, body.position.y);
+            body.position = new Vector3(wrapDistance, body.position.y);
         }
-        else if (body.position.x > 5)
+        else if (body.position.x > wrapDistance)
         {
-            body.position = new Vector3(-5 - player_collider.bounds.extents.x, body.position.y);
+            body.position = new Vector3(-wrapDistance - player_collider.bounds.extents.x, body.position.y);
         }
 
     }

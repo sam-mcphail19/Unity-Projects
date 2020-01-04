@@ -13,11 +13,7 @@ public class DeleteItems : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Player")
-        {
-            other.gameObject.GetComponent<PlayerBehaviour>().endGame();
-        }
-        else 
+        if (other.tag != "Player")
         {
             Destroy(other.gameObject);
         }
