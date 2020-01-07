@@ -45,6 +45,7 @@ public class PlayerBehaviour : MonoBehaviour
         if (body.velocity.y <= 0 && Physics.Raycast(downRay, out _, 0.5f))
         {
             body.velocity = new Vector3(body.velocity.x, jumpSpeed * Time.deltaTime);
+            Destroy(col.gameObject);
         }
     }
 
@@ -52,7 +53,7 @@ public class PlayerBehaviour : MonoBehaviour
     {
         if (hasBeenVisible)
         {
-            if (viewportPos.x < 0 || viewportPos.x > 1) // wrap from left to right
+            if (viewportPos.x < 0 || viewportPos.x > 1)
             {
                 transform.position = new Vector3(-transform.position.x, transform.position.y, transform.position.z);
             }

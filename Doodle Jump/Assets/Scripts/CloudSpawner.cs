@@ -12,18 +12,18 @@ public class CloudSpawner : MonoBehaviour
 
     void Start() 
     {
-        createCloud(player.transform.position - new Vector3(0, 2, 0));
+        CreateCloud(player.transform.position - new Vector3(0, 2, 0));
     }
 
     void FixedUpdate()
     {
         if (player.transform.position.y > highestCloudHeight - 5) 
         {
-            createCloud(new Vector3(Random.Range(-5f, 5f), highestCloudHeight + distBetweenClouds, 0));
+            CreateCloud(new Vector3(Random.Range(-5f, 5f), highestCloudHeight + distBetweenClouds, 0));
         }
     }
 
-    void createCloud(Vector3 pos) 
+    void CreateCloud(Vector3 pos) 
     {
         Instantiate(cloudPrefab, pos, Quaternion.identity);
         highestCloudHeight = pos.y;
