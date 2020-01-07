@@ -64,7 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\CloudSpawner.cs" />
-    <Compile Include="Assets\Scripts\DeleteItems.cs" />
+    <Compile Include="Assets\Scripts\DeleteCloud.cs" />
     <Compile Include="Assets\Scripts\FollowPlayer.cs" />
     <Compile Include="Assets\Scripts\PlayerBehaviour.cs" />
     <Reference Include="Unity.Timeline.Editor">
