@@ -17,8 +17,10 @@ ehthumbs.db
 sysinfo.txt
 */.vs
 *.stackdump
-*/Library/ScriptAssemblies
-*/Library/metadata
-*/Library/ShaderCache
-*/Library/PackageCache
+
+# Unity Project Folders
 */Temp
+*/Library
+*/UserSettings
+*/Packages
+*/Logs
