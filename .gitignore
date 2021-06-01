@@ -1,4 +1,3 @@
-*.meta
 .DS_Store
 ._*
 .Spotlight-V100
@@ -8,15 +7,20 @@ ehthumbs.db
 [Tt]humbs.db
 [Dd]esktop.ini
 [Ee]xported[Oo]bj/
-*.pidb
-*.suo
-*.user
-*.booproj
 [Oo]bj/
 [Bb]uild
 sysinfo.txt
 */.vs
 *.stackdump
+*/.vsconfig
+
+*.csproj
+*.sln
+*.pidb
+*.suo
+*.user
+*.booproj
+*.meta
 
 # Unity Project Folders
 */Temp
