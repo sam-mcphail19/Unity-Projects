@@ -232,11 +232,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 617840922}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3858edd87a1a8914abd1480fdd2b1e2d, type: 3}
+  m_Script: {fileID: 11500000, guid: e71fe0d4ae08a9d4786c841c081d958a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lightColor: {r: 0.8962264, g: 0.651262, b: 0.29169634, a: 0}
-  darkColor: {r: 0.47058824, g: 0.3137255, b: 0, a: 0}
+  lightColor: {r: 1, g: 0.88322395, b: 0.514151, a: 0}
+  darkColor: {r: 0.6698113, g: 0.47320482, b: 0.17377181, a: 0}
+  pieceScale: 0.5
   pieceManager: {fileID: 1366340771}
 --- !u!4 &617840924
 Transform:
@@ -278,32 +279,32 @@ MonoBehaviour:
   m_GameObject: {fileID: 1366340770}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 218b966face671141a3dc2b2b89b64a0, type: 3}
+  m_Script: {fileID: 11500000, guid: eb1b0c2ddbd9a624ebfe7dcfdba0bdd0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   pieces:
-    w_pawn: {fileID: 421191062671846005, guid: 1f954e2ee76652147bdc20a9e475bfc0, type: 3}
-    w_rook: {fileID: -8231439895271094956, guid: 1f954e2ee76652147bdc20a9e475bfc0,
+    w_pawn: {fileID: 421191062671846005, guid: cce610d0151847c478197f9e3954a27f, type: 3}
+    w_rook: {fileID: -8231439895271094956, guid: cce610d0151847c478197f9e3954a27f,
       type: 3}
-    w_knight: {fileID: 5262411738066956617, guid: 1f954e2ee76652147bdc20a9e475bfc0,
+    w_knight: {fileID: 5262411738066956617, guid: cce610d0151847c478197f9e3954a27f,
       type: 3}
-    w_bishop: {fileID: 1801684832408766203, guid: 1f954e2ee76652147bdc20a9e475bfc0,
+    w_bishop: {fileID: 1801684832408766203, guid: cce610d0151847c478197f9e3954a27f,
       type: 3}
-    w_queen: {fileID: -5707208235025365451, guid: 1f954e2ee76652147bdc20a9e475bfc0,
+    w_queen: {fileID: -5707208235025365451, guid: cce610d0151847c478197f9e3954a27f,
       type: 3}
-    w_king: {fileID: 5815346444209245126, guid: 1f954e2ee76652147bdc20a9e475bfc0,
+    w_king: {fileID: 5815346444209245126, guid: cce610d0151847c478197f9e3954a27f,
       type: 3}
-    b_pawn: {fileID: -7446464978723970562, guid: 1f954e2ee76652147bdc20a9e475bfc0,
+    b_pawn: {fileID: -7446464978723970562, guid: cce610d0151847c478197f9e3954a27f,
       type: 3}
-    b_rook: {fileID: -9028730725494140493, guid: 1f954e2ee76652147bdc20a9e475bfc0,
+    b_rook: {fileID: -9028730725494140493, guid: cce610d0151847c478197f9e3954a27f,
       type: 3}
-    b_knight: {fileID: 2484422302985503874, guid: 1f954e2ee76652147bdc20a9e475bfc0,
+    b_knight: {fileID: 2484422302985503874, guid: cce610d0151847c478197f9e3954a27f,
       type: 3}
-    b_bishop: {fileID: -4521170433502928094, guid: 1f954e2ee76652147bdc20a9e475bfc0,
+    b_bishop: {fileID: -4521170433502928094, guid: cce610d0151847c478197f9e3954a27f,
       type: 3}
-    b_queen: {fileID: -5519977043689896800, guid: 1f954e2ee76652147bdc20a9e475bfc0,
+    b_queen: {fileID: -5519977043689896800, guid: cce610d0151847c478197f9e3954a27f,
       type: 3}
-    b_king: {fileID: 6713323665980220584, guid: 1f954e2ee76652147bdc20a9e475bfc0,
+    b_king: {fileID: 6713323665980220584, guid: cce610d0151847c478197f9e3954a27f,
       type: 3}
 --- !u!4 &1366340772
 Transform:
