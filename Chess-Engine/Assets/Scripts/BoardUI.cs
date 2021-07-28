@@ -18,7 +18,7 @@ public class BoardUI : MonoBehaviour
     public Color lightColor;
     public Color darkColor;
 
-    public float pieceScale = 0.5f;
+    public float pieceScale = 1f;
 
     public PieceManager pieceManager;
 
