@@ -5,7 +5,8 @@ public class PieceManager : MonoBehaviour {
 
 	public Sprite getPieceSprite(int piece) {
 		if (Piece.IsWhite(piece)) {
-			return (piece & Piece.pieceTypeMask) switch {
+			return (piece & Piece.pieceTypeMask) switch
+			{
 				1 => pieces.w_pawn,
 				2 => pieces.w_knight,
 				3 => pieces.w_king,
@@ -16,7 +17,8 @@ public class PieceManager : MonoBehaviour {
 			};
 		}
 
-		return (piece & Piece.pieceTypeMask) switch {
+		return (piece & Piece.pieceTypeMask) switch
+		{
 			1 => pieces.b_pawn,
 			2 => pieces.b_knight,
 			3 => pieces.b_king,
@@ -28,15 +30,12 @@ public class PieceManager : MonoBehaviour {
 	}
 
 	[System.Serializable]
-	public class PieceSprites
-	{
+	public class PieceSprites {
 		public Sprite w_pawn, w_rook, w_knight, w_bishop, w_queen, w_king;
 		public Sprite b_pawn, b_rook, b_knight, b_bishop, b_queen, b_king;
 
-		public Sprite this[int i]
-		{
-			get
-			{
+		public Sprite this[int i] {
+			get {
 				return new Sprite[] { w_pawn, w_rook, w_knight, w_bishop, w_queen, w_king,
 									  b_pawn, b_rook, b_knight, b_bishop, b_queen, b_king}[i];
 			}
