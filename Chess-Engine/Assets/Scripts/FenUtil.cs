@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -37,7 +38,7 @@ public static class FenUtil {
 
 				int piece = pieceType;
 
-				if (current == currentLowered)
+				if (current != currentLowered)
 					piece |= Piece.WHITE;
 
 				board.PlacePieceOnSquare(piece, rank, file);
@@ -46,7 +47,7 @@ public static class FenUtil {
 			}
 		}
 
-		board.SetWhiteMovesNext(sections[1] == "w");
+		board.SetWhiteMovesNext(sections[1].Equals("w"));
 
 		board.SetAllCastlingAvailability(
 			sections[2].Contains("K"),
@@ -66,6 +67,13 @@ public static class FenUtil {
 		int moveCount = int.Parse(sections[5]);
 		board.SetMoveCounter(moveCount);
 
+		Debug.Log($"FEN string\"{fen}\" loaded.\n" +
+			$"GameState:\n" +
+			$"WhiteMovesNext: {board.WhiteMovesNext()}\n" +
+			$"CastlingAvailability: {board.GetAllCastlingAvailibility()}\n" +
+			$"EnPassantTarget: {board.GetEnPassantTarget()}\n" +
+			$"FiftyMoveRuleCount: {board.GetFiftyMoveRuleCounter()}\n" +
+			$"MoveCount: {board.GetMoveCounter()}");
 		return board;
 	}
 
