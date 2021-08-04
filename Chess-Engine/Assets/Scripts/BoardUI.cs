@@ -55,14 +55,14 @@ public class BoardUI : MonoBehaviour {
 
 		Material material = new Material(squareShader);
 
-		squareRenderers[file, rank] = square.GetComponent<MeshRenderer>();
-		squareRenderers[file, rank].material = material;
+		squareRenderers[rank, file] = square.GetComponent<MeshRenderer>();
+		squareRenderers[rank, file].material = material;
 
 		SpriteRenderer piece = new GameObject("Piece").AddComponent<SpriteRenderer>();
 		piece.transform.parent = square.transform;
 		piece.transform.position = GetSquarePosition(rank, file);
 		piece.transform.localScale = Vector3.one * pieceScale;
-		pieceRenderers[file, rank] = piece;
+		pieceRenderers[rank, file] = piece;
 	}
 
 	public void UpdatePosition(Board board) {
@@ -70,8 +70,8 @@ public class BoardUI : MonoBehaviour {
 			for (int file = 0; file < 8; file++) {
 				int piece = board.GetSquareContents(rank, file);
 				if (piece != 0) {
-					pieceRenderers[file, rank].sprite = pieceManager.getPieceSprite(piece);
-					pieceRenderers[file, rank].transform.position = GetSquarePosition(rank, file);
+					pieceRenderers[rank, file].sprite = pieceManager.getPieceSprite(piece);
+					pieceRenderers[rank, file].transform.position = GetSquarePosition(rank, file);
 				}
 			}
 		}
@@ -88,7 +88,7 @@ public class BoardUI : MonoBehaviour {
 	}
 
 	public void DragPiece(int rank, int file, Vector2 mousePos) {
-		pieceRenderers[file, rank].transform.position = new Vector3(mousePos.x, mousePos.y, pieceDragDepth);
+		pieceRenderers[rank, file].transform.position = new Vector3(mousePos.x, mousePos.y, pieceDragDepth);
 	}
 
 	public void SelectSquare(int rank, int file) {
@@ -104,7 +104,7 @@ public class BoardUI : MonoBehaviour {
 	}
 
 	public void ResetPiecePosition(int rank, int file) {
-		pieceRenderers[file, rank].transform.position = GetSquarePosition(rank, file);
+		pieceRenderers[rank, file].transform.position = GetSquarePosition(rank, file);
 	}
 
 	public void ResetPiecePosition((int, int) squarePos) {
@@ -125,7 +125,7 @@ public class BoardUI : MonoBehaviour {
 	}
 
 	private void SetSquareColor(int rank, int file, Color color) {
-		squareRenderers[file, rank].material.color = color;
+		squareRenderers[rank, file].material.color = color;
 	}
 
 	private void SetSquareColor((int, int) squarePos, Color color) {
