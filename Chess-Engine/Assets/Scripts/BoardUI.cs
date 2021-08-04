@@ -10,7 +10,6 @@ public class BoardUI : MonoBehaviour {
 
 	private const int FILE_COUNT = 8;
 	private const int RANK_COUNT = 8;
-	private const int SQUARE_SIZE = 1;
 	private const float pieceDragDepth = -0.2f;
 
 	public Color lightColor;
@@ -52,7 +51,7 @@ public class BoardUI : MonoBehaviour {
 		GameObject square = GameObject.CreatePrimitive(PrimitiveType.Quad);
 		square.transform.name = Board.SquarePosToSquareName(rank, file);
 		square.transform.parent = this.transform;
-		square.transform.position = this.transform.position + GetSquarePosition(rank, file);
+		square.transform.position = GetSquarePosition(rank, file);
 
 		Material material = new Material(squareShader);
 
@@ -61,7 +60,7 @@ public class BoardUI : MonoBehaviour {
 
 		SpriteRenderer piece = new GameObject("Piece").AddComponent<SpriteRenderer>();
 		piece.transform.parent = square.transform;
-		piece.transform.position = this.transform.position + GetSquarePosition(rank, file);
+		piece.transform.position = GetSquarePosition(rank, file);
 		piece.transform.localScale = Vector3.one * pieceScale;
 		pieceRenderers[file, rank] = piece;
 	}
@@ -72,7 +71,7 @@ public class BoardUI : MonoBehaviour {
 				int piece = board.GetSquareContents(rank, file);
 				if (piece != 0) {
 					pieceRenderers[file, rank].sprite = pieceManager.getPieceSprite(piece);
-					pieceRenderers[file, rank].transform.position = this.transform.position + GetSquarePosition(rank, file);
+					pieceRenderers[file, rank].transform.position = GetSquarePosition(rank, file);
 				}
 			}
 		}
@@ -89,8 +88,7 @@ public class BoardUI : MonoBehaviour {
 	}
 
 	public void DragPiece(int rank, int file, Vector2 mousePos) {
-		Debug.Log($"Dragging piece to mousePos: {mousePos}");
-		pieceRenderers[rank, file].transform.position = new Vector3(mousePos.x, mousePos.y, pieceDragDepth);
+		pieceRenderers[file, rank].transform.position = new Vector3(mousePos.x, mousePos.y, pieceDragDepth);
 	}
 
 	public void SelectSquare(int rank, int file) {
@@ -106,8 +104,7 @@ public class BoardUI : MonoBehaviour {
 	}
 
 	public void ResetPiecePosition(int rank, int file) {
-		Vector3 pos = GetSquarePosition(rank, file);
-		pieceRenderers[file, rank].transform.position = pos;
+		pieceRenderers[file, rank].transform.position = GetSquarePosition(rank, file);
 	}
 
 	public void ResetPiecePosition((int, int) squarePos) {
@@ -144,6 +141,6 @@ public class BoardUI : MonoBehaviour {
 	}
 
 	private Vector3 GetSquarePosition(int rank, int file, int depth = 0) {
-		return new Vector3(file * SQUARE_SIZE, rank * SQUARE_SIZE, depth);
+		return new Vector3(-3.5f + file, -3.5f + rank, depth);
 	}
 }
