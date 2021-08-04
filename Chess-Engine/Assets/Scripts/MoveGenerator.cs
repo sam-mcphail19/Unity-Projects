@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class MoveGenerator {
 
+	private const int FILE_COUNT = 8;
+	private const int RANK_COUNT = 8;
+
+	private static readonly int[] KNIGHT_TARGETS = { -17, -15, -10, -6, 6, 10, 15, 17 };
+
 	List<Move> moves;
 	Board board;
 
@@ -25,8 +30,8 @@ public class MoveGenerator {
 		}
 		*/
 		//GenerateSlidingMoves();
-		//GenerateKnightMoves();
-		GeneratePawnMoves();
+		GenerateKnightMoves();
+		//GeneratePawnMoves();
 
 		return moves;
 	}
@@ -42,24 +47,57 @@ public class MoveGenerator {
 		List<int> pawns = board.GetPieceTypes(this.whiteMovesNext, Piece.PieceType.Pawn);
 
 		foreach (int pawn in pawns) {
-			moves.Add(new Move(pawn, pawn+8));
-			moves.Add(new Move(pawn, pawn+16));
+			//moves.Add(new Move(pawn, pawn + 8));
+			//moves.Add(new Move(pawn, pawn + 16));
 		}
 	}
 
 	private void GenerateKnightMoves() {
-		throw new NotImplementedException();
+		List<int> knights = board.GetPieceTypes(this.whiteMovesNext, Piece.PieceType.Knight);
+
+		foreach (int knight in knights) {
+			foreach (int target in KNIGHT_TARGETS) {
+				int targetIndex = knight + target;
+
+				(int, int) knightSquare = Board.IndexToSquarePos(knight);
+				(int, int) targetSquare = Board.IndexToSquarePos(targetIndex);
+				if (Math.Abs(knightSquare.Item1 - targetSquare.Item1) + Math.Abs(knightSquare.Item2 - targetSquare.Item2) != 3)
+					continue;
+
+				if (Board.IsIndexInBounds(targetIndex)) {
+					int targetSquareContent = board.GetSquareContents(targetSquare);
+					if (Piece.GetPieceType(targetSquareContent) != Piece.PieceType.None)
+						if (Piece.IsWhite(targetSquareContent) == this.whiteMovesNext)
+							continue;
+					moves.Add(new Move(knight, targetIndex));
+				}
+			}
+		}
 	}
 
 	private void GenerateSlidingMoves() {
-		throw new NotImplementedException();
+		GenerateQueenMoves();
+		GenerateRookMoves();
+		GenerateBishopMoves();
 	}
 
 	private void GenerateKingMoves() {
 		throw new NotImplementedException();
 	}
 
-	private void CalculateAttackData() {
+	private void GenerateAttackData() {
+		throw new NotImplementedException();
+	}
+
+	private void GenerateQueenMoves() {
+		throw new NotImplementedException();
+	}
+
+	private void GenerateRookMoves() {
+		throw new NotImplementedException();
+	}
+
+	private void GenerateBishopMoves() {
 		throw new NotImplementedException();
 	}
 }

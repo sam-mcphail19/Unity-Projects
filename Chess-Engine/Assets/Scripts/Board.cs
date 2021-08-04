@@ -34,6 +34,11 @@ public class Board {
 	}
 
 	public void MakeMove(Move move) {
+		(int, int) startSquarePos = IndexToSquarePos(move.GetStartSquare());
+		(int, int) targetSquarePos = IndexToSquarePos(move.GetTargetSquare());
+
+		this.representation[targetSquarePos.Item1, targetSquarePos.Item2] = representation[startSquarePos.Item1, startSquarePos.Item2];
+		this.representation[startSquarePos.Item1, startSquarePos.Item2] = 0;
 
 		SetWhiteMovesNext(!WhiteMovesNext());
 	}
@@ -174,6 +179,10 @@ public class Board {
 
 	public static (int, int) IndexToSquarePos(int index) {
 		return ((int)Math.Floor((float)index / RANK_COUNT), index % FILE_COUNT);
+	}
+
+	public static bool IsIndexInBounds(int index) {
+		return !(index < 0) && !(index > 63);
 	}
 
 	private static int BoolToInt(bool boolean) {

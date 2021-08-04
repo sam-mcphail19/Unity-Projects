@@ -13,6 +13,7 @@ public static class Piece {
 	public static PieceType GetPieceType(int piece) {
 		return (piece & pieceTypeMask) switch
 		{
+			0 => PieceType.None,
 			1 => PieceType.Pawn,
 			2 => PieceType.Knight,
 			3 => PieceType.King,
@@ -50,6 +51,7 @@ public static class Piece {
 		Bishop,
 		Rook,
 		Queen,
-		King
+		King,
+		None
 	}
 }
