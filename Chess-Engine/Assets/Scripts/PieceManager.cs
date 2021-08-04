@@ -4,6 +4,8 @@ public class PieceManager : MonoBehaviour {
 	public PieceSprites pieces;
 
 	public Sprite getPieceSprite(int piece) {
+		if (piece == 0)
+			return null;
 		if (Piece.IsWhite(piece)) {
 			return (piece & Piece.pieceTypeMask) switch
 			{

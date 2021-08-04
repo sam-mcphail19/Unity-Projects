@@ -67,12 +67,10 @@ public class BoardUI : MonoBehaviour {
 
 	public void UpdatePosition(Board board) {
 		for (int rank = 0; rank < 8; rank++) {
-			for (int file = 0; file < 8; file++) {
+			for (int file = 0; file < 8; file++) {	
 				int piece = board.GetSquareContents(rank, file);
-				if (piece != 0) {
-					pieceRenderers[rank, file].sprite = pieceManager.getPieceSprite(piece);
-					pieceRenderers[rank, file].transform.position = GetSquarePosition(rank, file);
-				}
+				pieceRenderers[rank, file].sprite = pieceManager.getPieceSprite(piece);
+				pieceRenderers[rank, file].transform.position = GetSquarePosition(rank, file);
 			}
 		}
 	}
