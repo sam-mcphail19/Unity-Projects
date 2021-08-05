@@ -55,23 +55,24 @@ public static class FenUtil {
 			sections[2].Contains("k"),
 			sections[2].Contains("q"));
 
-		if (sections[3].Equals("-"))
-			board.SetEnPassantTarget(0, 0);
-		else {
-			(int, int) enPassantTarget = Board.SquareNameToSquarePos(sections[3]);
-			board.SetEnPassantTarget(enPassantTarget.Item1, enPassantTarget.Item2);
+		if (sections.Length > 3) {
+			if (sections[3].Equals("-"))
+				board.SetEnPassantTarget(0);
+			else 
+				board.SetEnPassantTarget(Board.SquareNameToSquarePos(sections[3]).Item2);
 		}
-		int fiftyMoveRuleCount = int.Parse(sections[4]);
-		board.SetFiftyMoveRuleCounter(fiftyMoveRuleCount);
 
-		int moveCount = int.Parse(sections[5]);
-		board.SetMoveCounter(moveCount);
+		if (sections.Length > 4)
+			board.SetFiftyMoveRuleCounter(int.Parse(sections[4]));
+
+		if (sections.Length > 5)
+			board.SetMoveCounter(int.Parse(sections[5]));
 
 		Debug.Log($"FEN string\"{fen}\" loaded.\n" +
 			$"GameState:\n" +
 			$"WhiteMovesNext: {board.WhiteMovesNext()}\n" +
 			$"CastlingAvailability: {board.GetAllCastlingAvailibility()}\n" +
-			$"EnPassantTarget: {board.GetEnPassantTarget()}\n" +
+			$"EnPassantTarget: {board.GetEnPassantTargetName()}\n" +
 			$"FiftyMoveRuleCount: {board.GetFiftyMoveRuleCounter()}\n" +
 			$"MoveCount: {board.GetMoveCounter()}");
 		return board;

@@ -11,21 +11,25 @@ public class Board {
 	// Bit 0 - current turn, 1 for white's turn, 0 for black
 	// Bits 1-4 - castling availability,
 	// white can kingside, white can queenside, black can kingside, black can queenside
-	// Bits 5-7 - rank of available en passant target square (square behind pawn that just moved 2 spaces)
-	// Bits 8-10 - file of available en passant target square (square behind pawn that just moved 2 spaces)
+	// Bits 5-7 - file of available en passant target square (square behind pawn that just moved 2 spaces)
+	// (starting at 1, 0 means no en passant)
+	// (en passant is always on the 3rd or 6th rank depending on which player just moved
+	// Bits 8-10 - what piece type was just taken
 	// Bits 11-16 - half move counter for 50-move rule
 	// Remaining bits - move count (starts at 1, increments after black move)
 	public int GameState;
+	Stack<int> gameStateHistory;
 
 	private const int turnMask = 1;
 	private const int castlingMask = 30;
-	private const int enRankMask = 224;
-	private const int enFileMask = 1792;
+	private const int enFileMask = 224;
+	private const int pieceTypeMask = 1792;
 	private const int fiftyMoveCounterMask = 129024;
 	private const int moveCountMask = ~131071;
 
 	public Board() {
-		this.GameState = 0b0;
+		this.GameState = 0;
+		this.gameStateHistory = new Stack<int>();
 		this.representation = new int[RANK_COUNT, FILE_COUNT];
 
 		for (int file = 0; file < FILE_COUNT; file++)
@@ -34,13 +38,33 @@ public class Board {
 	}
 
 	public void MakeMove(Move move) {
+		this.gameStateHistory.Push(GameState);
+
 		(int, int) startSquarePos = IndexToSquarePos(move.GetStartSquare());
 		(int, int) targetSquarePos = IndexToSquarePos(move.GetTargetSquare());
 
-		this.representation[targetSquarePos.Item1, targetSquarePos.Item2] = representation[startSquarePos.Item1, startSquarePos.Item2];
-		this.representation[startSquarePos.Item1, startSquarePos.Item2] = 0;
+		int pieceType = GetSquareContents(targetSquarePos);
+		SetTakenPieceType(pieceType != 0 ? pieceType: 0);
 
 		SetWhiteMovesNext(!WhiteMovesNext());
+		SetFiftyMoveRuleCounter(GetFiftyMoveRuleCounter() + 1);
+		if (WhiteMovesNext())
+			SetMoveCounter(GetMoveCounter() + 1);
+
+		this.representation[targetSquarePos.Item1, targetSquarePos.Item2] = representation[startSquarePos.Item1, startSquarePos.Item2];
+		this.representation[startSquarePos.Item1, startSquarePos.Item2] = 0;
+	}
+
+	public void UnmakeMove(Move move) {
+		int previousState = gameStateHistory.Pop();
+
+		(int, int) startSquarePos = IndexToSquarePos(move.GetStartSquare());
+		(int, int) targetSquarePos = IndexToSquarePos(move.GetTargetSquare());
+
+		this.representation[startSquarePos.Item1, startSquarePos.Item2] = this.representation[targetSquarePos.Item1, targetSquarePos.Item2];
+		this.representation[targetSquarePos.Item1, targetSquarePos.Item2] = GetTakenPieceType();
+
+		this.GameState = previousState;
 	}
 
 	public int GetSquareContents(int rank, int file) {
@@ -87,19 +111,30 @@ public class Board {
 		return (availibility % 2 > 0, availibility % 4 > 1, availibility % 8 > 3, availibility % 16 > 7);
 	}
 
-	public void SetEnPassantTarget(int rank, int file) {
-		this.GameState &= ~enRankMask;
+	public void SetEnPassantTarget(int file) {
 		this.GameState &= ~enFileMask;
 
-		this.GameState |= rank << 5;
-		this.GameState |= file << 8;
+		this.GameState |= file << 5;
 	}
 
-	public string GetEnPassantTarget() {
-		int rank = (GameState & enRankMask) >> 5;
-		int file = (GameState & enFileMask) >> 8;
-		int index = SquarePosToIndex(rank, file);
-		return index == 0 ? "-" : SquarePosToSquareName(rank, file);
+	public int GetEnPassantTarget() {
+		return (GameState & enFileMask) >> 5;
+	}
+
+	public string GetEnPassantTargetName() {
+		int file = GetEnPassantTarget();
+		int rank = WhiteMovesNext() ? 6 : 3;
+		return SquarePosToIndex(rank, file) == 0 ? "-" : SquarePosToSquareName(rank, file);
+	}
+
+	public void SetTakenPieceType(int pieceType) {
+		this.GameState &= ~pieceTypeMask;
+
+		this.GameState |= pieceType << 5;
+	}
+
+	public int GetTakenPieceType() {
+		return (GameState & pieceTypeMask) >> 8;
 	}
 
 	public void SetFiftyMoveRuleCounter(int count) {
