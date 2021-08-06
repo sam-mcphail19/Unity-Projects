@@ -10,6 +10,10 @@ public static class Piece {
 
 	public static int pieceTypeMask = 7;
 
+	public static int NewPiece(PieceType pieceType, Color color) {
+		return (int)pieceType | (int)color;
+	}
+
 	public static PieceType GetPieceType(int piece) {
 		return (piece & pieceTypeMask) switch
 		{

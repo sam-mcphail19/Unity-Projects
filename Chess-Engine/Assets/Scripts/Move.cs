@@ -59,4 +59,8 @@ public class Move {
 			flag == (int)Flag.PromoteToRook ||
 			flag == (int)Flag.PromoteToQueen;
 	}
+
+	public override string ToString() {
+		return $"From {GetStartSquare()} to {GetTargetSquare()}";
+	}
 }

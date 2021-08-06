@@ -34,7 +34,16 @@ public class Board {
 
 		for (int file = 0; file < FILE_COUNT; file++)
 			for (int rank = 0; rank < RANK_COUNT; rank++)
-				this.representation[rank, file] = 0;
+				PlacePieceOnSquare(0, rank, file);
+	}
+
+	public Board Clone() {
+		Board board = new Board();
+		board.representation = (int[,])this.representation.Clone();
+		board.GameState = this.GameState;
+		board.gameStateHistory = new Stack<int>(new Stack<int>(this.gameStateHistory));
+
+		return board;
 	}
 
 	public void MakeMove(Move move) {
@@ -43,16 +52,16 @@ public class Board {
 		(int, int) startSquarePos = IndexToSquarePos(move.GetStartSquare());
 		(int, int) targetSquarePos = IndexToSquarePos(move.GetTargetSquare());
 
-		int pieceType = GetSquareContents(targetSquarePos);
-		SetTakenPieceType(pieceType != 0 ? pieceType: 0);
+		int pieceType = (int)Piece.GetPieceType(GetSquareContents(targetSquarePos));
+		SetTakenPieceType(pieceType);
 
 		SetWhiteMovesNext(!WhiteMovesNext());
 		SetFiftyMoveRuleCounter(GetFiftyMoveRuleCounter() + 1);
 		if (WhiteMovesNext())
 			SetMoveCounter(GetMoveCounter() + 1);
 
-		this.representation[targetSquarePos.Item1, targetSquarePos.Item2] = representation[startSquarePos.Item1, startSquarePos.Item2];
-		this.representation[startSquarePos.Item1, startSquarePos.Item2] = 0;
+		PlacePieceOnSquare(GetSquareContents(startSquarePos), targetSquarePos.Item1, targetSquarePos.Item2);
+		PlacePieceOnSquare(0, startSquarePos.Item1, startSquarePos.Item2);
 	}
 
 	public void UnmakeMove(Move move) {
@@ -73,6 +82,9 @@ public class Board {
 
 	public int GetSquareContents((int, int) squarePos) {
 		return GetSquareContents(squarePos.Item1, squarePos.Item2);
+	}
+	public int GetSquareContentsAtIndex(int index) {
+		return GetSquareContents(IndexToSquarePos(index));
 	}
 
 	public void PlacePieceOnSquare(int piece, int rank, int file) {
@@ -214,6 +226,10 @@ public class Board {
 
 	public static (int, int) IndexToSquarePos(int index) {
 		return ((int)Math.Floor((float)index / RANK_COUNT), index % FILE_COUNT);
+	}
+
+	public static string IndexToSquareName(int index) {
+		return SquarePosToSquareName(IndexToSquarePos(index));
 	}
 
 	public static bool IsIndexInBounds(int index) {

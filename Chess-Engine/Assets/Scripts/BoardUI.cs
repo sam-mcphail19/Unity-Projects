@@ -130,11 +130,11 @@ public class BoardUI : MonoBehaviour {
 		SetSquareColor(squarePos.Item1, squarePos.Item2, color);
 	}
 
-	private bool IsSquareLight(int rank, int file) {
+	public static bool IsSquareLight(int rank, int file) {
 		return (rank + file) % 2 == 1;
 	}
 
-	private bool IsSquareLight((int, int) squarePos) {
+	public static bool IsSquareLight((int, int) squarePos) {
 		return IsSquareLight(squarePos.Item1, squarePos.Item2);
 	}
 
