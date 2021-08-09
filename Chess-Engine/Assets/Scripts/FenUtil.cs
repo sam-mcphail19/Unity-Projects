@@ -5,7 +5,9 @@ using UnityEngine;
 
 public static class FenUtil {
 
-	private const string INITIAL_POS = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+	//private const string INITIAL_POS = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+	//private const string INITIAL_POS = "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8"; // For testing promotion
+	private const string INITIAL_POS = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -"; // For testing castling
 
 	private static Dictionary<char, int> symbolToPieceType = new Dictionary<char, int>() {
 		{'p', Piece.PAWN},

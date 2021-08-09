@@ -40,12 +40,12 @@ public class Move {
 		this.representation = (ushort)(startSquare.GetIndex() | targetSquare.GetIndex() << 6);
 	}
 
-	public Move(int startSquare, int targetSquare, int flag) {
-		this.representation = (ushort)(startSquare | targetSquare << 6 | flag << 12);
+	public Move(int startSquare, int targetSquare, Flag flag) {
+		this.representation = (ushort)(startSquare | targetSquare << 6 | (int)flag << 12);
 	}
 
-	public Move(Coord startSquare, Coord targetSquare, int flag) {
-		this.representation = (ushort)(startSquare.GetIndex() | targetSquare.GetIndex() << 6 | flag << 12);
+	public Move(Coord startSquare, Coord targetSquare, Flag flag) {
+		this.representation = (ushort)(startSquare.GetIndex() | targetSquare.GetIndex() << 6 | (int)flag << 12);
 	}
 
 	public int GetStartSquareIndex() {
@@ -73,6 +73,9 @@ public class Move {
 	}
 
 	public string ToString(int piece) {
+		if (GetFlag() == (int)Flag.Castling)
+			return new Coord(GetTargetSquareIndex()).GetFile() == 2 ? "O-O-O" : "O-O";
+
 		return $"{Piece.GetPieceTypeAbbreviation(piece)}{new Coord(GetTargetSquareIndex())}";
 	}
 }

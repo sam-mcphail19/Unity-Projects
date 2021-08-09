@@ -62,6 +62,21 @@ public class Board {
 
 		PlacePieceOnSquare(GetSquareContents(startSquare), targetSquare);
 		PlacePieceOnSquare(0, startSquare);
+
+		if (move.GetFlag() == (int)Move.Flag.Castling) {
+			// Queen side castle
+			if (targetSquare.GetFile() == 2) {
+				Coord rookSquare = new Coord(move.GetTargetSquareIndex() - 2);
+				PlacePieceOnSquare(GetSquareContents(rookSquare), new Coord(move.GetTargetSquareIndex() + 1));
+				PlacePieceOnSquare(0, rookSquare);
+			}
+			// King side castle
+			if (targetSquare.GetFile() == 6) {
+				Coord rookSquare = new Coord(move.GetTargetSquareIndex() + 1);
+				PlacePieceOnSquare(GetSquareContents(rookSquare), new Coord(move.GetTargetSquareIndex() - 1));
+				PlacePieceOnSquare(0, rookSquare);
+			}
+		}
 	}
 
 	public void UnmakeMove(Move move) {
@@ -113,7 +128,7 @@ public class Board {
 	//fourth bit: mod 16 > 7
 	public bool[] GetAllCastlingAvailibility() {
 		int availibility = (GameState & castlingMask) >> 1;
-		return new bool[]{ availibility % 2 > 0, availibility % 4 > 1, availibility % 8 > 3, availibility % 16 > 7};
+		return new bool[] { availibility % 2 > 0, availibility % 4 > 1, availibility % 8 > 3, availibility % 16 > 7 };
 	}
 
 	public void SetEnPassantTarget(int file) {

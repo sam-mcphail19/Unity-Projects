@@ -128,6 +128,8 @@ public class HumanPlayer : Player {
 		}
 
 		if (moveIsLegal) {
+			Debug.Log("Move made: " +
+				$"{chosenMove.ToString(board.GetSquareContents(startSquare))}");
 			ChoseMove(chosenMove);
 			currentState = InputState.None;
 		} else {

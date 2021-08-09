@@ -55,7 +55,7 @@ public class MoveGenerator {
 
 				if ((this.whiteMovesNext && pawn.GetRank() == 1) || (!this.whiteMovesNext && pawn.GetRank() == 6)) {
 					Coord doubleMoveTarget = new Coord(this.whiteMovesNext ? pawnIndex + 16 : pawnIndex - 16);
-					move = new Move(pawnIndex, doubleMoveTarget.GetIndex(), (int)Move.Flag.PawnTwoForward);
+					move = new Move(pawnIndex, doubleMoveTarget.GetIndex(), Move.Flag.PawnTwoForward);
 					if (board.GetSquareContents(doubleMoveTarget) == 0 && !MoveAllowsKingToBeTaken(move))
 						moves.Add(move);
 				}
@@ -130,7 +130,7 @@ public class MoveGenerator {
 			AddMoveIfLegal(targetContents, kingIndex, target);
 		}
 
-		//GenerateCastlingMoves(king);
+		GenerateCastlingMoves(kingIndex);
 	}
 
 	private void GenerateQueenMoves() {
@@ -197,12 +197,28 @@ public class MoveGenerator {
 	private void GenerateCastlingMoves(int king) {
 		bool[] castlingRights = board.GetAllCastlingAvailibility();
 
-		for (int i = whiteMovesNext ? 0 : 2; i < (whiteMovesNext ? 2 : 4); i++) {
-			if (castlingRights[i]) {
-				// king side castling
-				if (i % 2 == 1) {
-					//if (!MoveAllowsKingToBeTaken(new Move()))
-				}
+		int i = whiteMovesNext ? 0 : 2;
+		int rank = whiteMovesNext ? 0 : 7;
+
+		// King side castling
+		if (castlingRights[i]) {
+			// Make sure inbetween square and result square are empty and not attacked
+			if (board.GetSquareContents(new Coord(rank, 5)) == 0 && 
+				board.GetSquareContents(new Coord(rank, 6)) == 0 && 
+				!MoveAllowsKingToBeTaken(new Move(king, king + 1)) &&
+				!MoveAllowsKingToBeTaken(new Move(king, king + 2))) {
+				moves.Add(new Move(king, king + 2, Move.Flag.Castling));
+			}
+		}
+
+		// Queen side castling
+		if (castlingRights[i+1]) {
+			// Make sure inbetween squares and result square are empty and not attacked
+			if (board.GetSquareContents(new Coord(rank, 1)) == 0 &&
+				board.GetSquareContents(new Coord(rank, 2)) == 0 &&
+				!MoveAllowsKingToBeTaken(new Move(king, king - 1)) &&
+				!MoveAllowsKingToBeTaken(new Move(king, king - 2))) {
+				moves.Add(new Move(king, king - 2, Move.Flag.Castling));
 			}
 		}
 	}
