@@ -16,7 +16,7 @@ public class HumanPlayer : Player {
 	Board board;
 	MoveGenerator moveGenerator;
 
-	(int, int) selectedPieceSquare;
+	Coord selectedPieceSquare;
 
 	public HumanPlayer(Board board) {
 		boardUI = GameObject.FindObjectOfType<BoardUI>();
@@ -52,14 +52,14 @@ public class HumanPlayer : Player {
 	}
 
 	void HandleDragMovement(Vector2 mousePos) {
-		boardUI.DragPiece(selectedPieceSquare.Item1, selectedPieceSquare.Item2, mousePos);
+		boardUI.DragPiece(selectedPieceSquare, mousePos);
 		if (Input.GetMouseButtonUp(0)) {
 			HandlePiecePlacement(mousePos);
 		}
 	}
 
 	void HandlePiecePlacement(Vector2 mousePos) {
-		if (boardUI.TryGetSquareUnderMouse(mousePos, out (int, int) targetSquare)) {
+		if (boardUI.TryGetSquareUnderMouse(mousePos, out Coord targetSquare)) {
 			// Place the piece back on its original square
 			if (targetSquare.Equals(selectedPieceSquare)) {
 				boardUI.ResetPiecePosition(selectedPieceSquare);
@@ -106,9 +106,7 @@ public class HumanPlayer : Player {
 		}
 	}
 
-	void TryMakeMove((int, int) startSquare, (int, int) targetSquare) {
-		int startIndex = Board.SquarePosToIndex(startSquare);
-		int targetIndex = Board.SquarePosToIndex(targetSquare);
+	void TryMakeMove(Coord startSquare, Coord targetSquare) {
 		bool moveIsLegal = false;
 		Move chosenMove = new Move();
 
@@ -116,7 +114,7 @@ public class HumanPlayer : Player {
 		bool wantsKnightPromotion = Input.GetKey(KeyCode.LeftAlt);
 
 		foreach (Move move in moveGenerator.GenerateMoves(board)) {
-			if (move.GetStartSquare() == startIndex && move.GetTargetSquare() == targetIndex) {
+			if (move.GetStartSquareIndex() == startSquare.GetIndex() && move.GetTargetSquareIndex() == targetSquare.GetIndex()) {
 				if (move.IsPromotion()) {
 					if (move.GetFlag() == (int)Move.Flag.PromoteToQueen && wantsKnightPromotion)
 						continue;
@@ -133,9 +131,8 @@ public class HumanPlayer : Player {
 			ChoseMove(chosenMove);
 			currentState = InputState.None;
 		} else {
-			Debug.Log($"Illegal move. Could not move piece: {Piece.GetPieceType(board.GetSquareContents(selectedPieceSquare))}" +
-						$" on square: {Board.SquarePosToSquareName(selectedPieceSquare)}" +
-						$" to new square: {Board.SquarePosToSquareName(targetSquare)}");
+			Debug.Log("Illegal move. Could not make move: " +
+				$"{new Move(startSquare, targetSquare).ToString(board.GetSquareContents(startSquare))}");
 			CancelPieceSelection();
 		}
 	}

@@ -49,9 +49,10 @@ public class BoardUI : MonoBehaviour {
 	// The file, and the rank the square
 	private void CreateSquare(int rank, int file) {
 		GameObject square = GameObject.CreatePrimitive(PrimitiveType.Quad);
-		square.transform.name = Board.SquarePosToSquareName(rank, file);
+		Coord coord = new Coord(rank, file);
+		square.transform.name = coord.ToString();
 		square.transform.parent = this.transform;
-		square.transform.position = GetSquarePosition(rank, file);
+		square.transform.position = GetSquarePosition(coord);
 
 		Material material = new Material(squareShader);
 
@@ -60,85 +61,71 @@ public class BoardUI : MonoBehaviour {
 
 		SpriteRenderer piece = new GameObject("Piece").AddComponent<SpriteRenderer>();
 		piece.transform.parent = square.transform;
-		piece.transform.position = GetSquarePosition(rank, file);
+		piece.transform.position = GetSquarePosition(coord);
 		piece.transform.localScale = Vector3.one * pieceScale;
 		pieceRenderers[rank, file] = piece;
 	}
 
 	public void UpdatePosition(Board board) {
 		for (int rank = 0; rank < 8; rank++) {
-			for (int file = 0; file < 8; file++) {	
-				int piece = board.GetSquareContents(rank, file);
+			for (int file = 0; file < 8; file++) {
+				Coord coord = new Coord(rank, file);
+				int piece = board.GetSquareContents(coord);
 				pieceRenderers[rank, file].sprite = pieceManager.getPieceSprite(piece);
-				pieceRenderers[rank, file].transform.position = GetSquarePosition(rank, file);
+				pieceRenderers[rank, file].transform.position = GetSquarePosition(coord);
 			}
 		}
 	}
 
-	public void HighlightLegalMoves(List<Move> moves, (int, int) fromSquare) {
+	public void HighlightLegalMoves(List<Move> moves, Coord fromSquare) {
 		for (int i = 0; i < moves.Count; i++) {
 			Move move = moves[i];
-			if (move.GetStartSquare() == Board.SquarePosToIndex(fromSquare)) {
-				(int, int) targetSquare = Board.IndexToSquarePos(move.GetTargetSquare());
-				SetSquareColor(targetSquare, IsSquareLight(targetSquare) ? lightColorLegalMove : darkColorLegalMove);
+			if (move.GetStartSquareIndex() == fromSquare.GetIndex()) {
+				Coord target = new Coord(move.GetTargetSquareIndex());
+				SetSquareColor(target, IsSquareLight(target) ? lightColorLegalMove : darkColorLegalMove);
 			}
 		}
 	}
 
-	public void DragPiece(int rank, int file, Vector2 mousePos) {
-		pieceRenderers[rank, file].transform.position = new Vector3(mousePos.x, mousePos.y, pieceDragDepth);
+	public void DragPiece(Coord coord, Vector2 mousePos) {
+		pieceRenderers[coord.GetRank(), coord.GetFile()].transform.position = new Vector3(mousePos.x, mousePos.y, pieceDragDepth);
 	}
 
-	public void SelectSquare(int rank, int file) {
-		SetSquareColor(rank, file, IsSquareLight(rank, file) ? lightColorSelected : darkColorSelected);
-	}
-
-	public void SelectSquare((int, int) squarePos) {
-		SelectSquare(squarePos.Item1, squarePos.Item2);
+	public void SelectSquare(Coord coord) {
+		SetSquareColor(coord, IsSquareLight(coord) ? lightColorSelected : darkColorSelected);
 	}
 
 	public void DeselectSquare() {
 		ResetSquareColors();
 	}
 
-	public void ResetPiecePosition(int rank, int file) {
-		pieceRenderers[rank, file].transform.position = GetSquarePosition(rank, file);
+	public void ResetPiecePosition(Coord coord) {
+		pieceRenderers[coord.GetRank(), coord.GetFile()].transform.position = GetSquarePosition(coord);
 	}
 
-	public void ResetPiecePosition((int, int) squarePos) {
-		ResetPiecePosition(squarePos.Item1, squarePos.Item2);
-	}
+	public bool TryGetSquareUnderMouse(Vector2 mouseWorld, out Coord coord) {
+		coord = new Coord((int)(mouseWorld.y + 4), (int)(mouseWorld.x + 4));
 
-	public bool TryGetSquareUnderMouse(Vector2 mouseWorld, out (int, int) squarePos) {
-		squarePos.Item1 = (int)(mouseWorld.y + 4);
-		squarePos.Item2 = (int)(mouseWorld.x + 4);
-
-		return squarePos.Item2 >= 0 && squarePos.Item2 < 8 && squarePos.Item1 >= 0 && squarePos.Item1 < 8;
+		return coord.GetRank() >= 0 && coord.GetRank() < 8 && coord.GetFile() >= 0 && coord.GetFile() < 8;
 	}
 
 	public void ResetSquareColors() {
 		for (int rank = 0; rank < FILE_COUNT; rank++)
-			for (int file = 0; file < RANK_COUNT; file++)
-				SetSquareColor(rank, file, IsSquareLight(rank, file) ? lightColor : darkColor);
+			for (int file = 0; file < RANK_COUNT; file++) {
+				Coord coord = new Coord(rank, file);
+				SetSquareColor(coord, IsSquareLight(coord) ? lightColor : darkColor);
+			}
 	}
 
-	private void SetSquareColor(int rank, int file, Color color) {
-		squareRenderers[rank, file].material.color = color;
+	private void SetSquareColor(Coord coord, Color color) {
+		squareRenderers[coord.GetRank(), coord.GetFile()].material.color = color;
 	}
 
-	private void SetSquareColor((int, int) squarePos, Color color) {
-		SetSquareColor(squarePos.Item1, squarePos.Item2, color);
+	public static bool IsSquareLight(Coord coord) {
+		return (coord.GetRank() + coord.GetFile()) % 2 == 1;
 	}
 
-	public static bool IsSquareLight(int rank, int file) {
-		return (rank + file) % 2 == 1;
-	}
-
-	public static bool IsSquareLight((int, int) squarePos) {
-		return IsSquareLight(squarePos.Item1, squarePos.Item2);
-	}
-
-	private Vector3 GetSquarePosition(int rank, int file, int depth = 0) {
-		return new Vector3(-3.5f + file, -3.5f + rank, depth);
+	private Vector3 GetSquarePosition(Coord coord, int depth = 0) {
+		return new Vector3(-3.5f + coord.GetFile(), -3.5f + coord.GetRank(), depth);
 	}
 }

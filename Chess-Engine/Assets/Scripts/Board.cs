@@ -34,7 +34,7 @@ public class Board {
 
 		for (int file = 0; file < FILE_COUNT; file++)
 			for (int rank = 0; rank < RANK_COUNT; rank++)
-				PlacePieceOnSquare(0, rank, file);
+				PlacePieceOnSquare(0, new Coord(rank, file));
 	}
 
 	public Board Clone() {
@@ -49,10 +49,10 @@ public class Board {
 	public void MakeMove(Move move) {
 		this.gameStateHistory.Push(GameState);
 
-		(int, int) startSquarePos = IndexToSquarePos(move.GetStartSquare());
-		(int, int) targetSquarePos = IndexToSquarePos(move.GetTargetSquare());
+		Coord startSquare = new Coord(move.GetStartSquareIndex());
+		Coord targetSquare = new Coord(move.GetTargetSquareIndex());
 
-		int pieceType = (int)Piece.GetPieceType(GetSquareContents(targetSquarePos));
+		int pieceType = (int)Piece.GetPieceType(GetSquareContents(targetSquare));
 		SetTakenPieceType(pieceType);
 
 		SetWhiteMovesNext(!WhiteMovesNext());
@@ -60,35 +60,28 @@ public class Board {
 		if (WhiteMovesNext())
 			SetMoveCounter(GetMoveCounter() + 1);
 
-		PlacePieceOnSquare(GetSquareContents(startSquarePos), targetSquarePos.Item1, targetSquarePos.Item2);
-		PlacePieceOnSquare(0, startSquarePos.Item1, startSquarePos.Item2);
+		PlacePieceOnSquare(GetSquareContents(startSquare), targetSquare);
+		PlacePieceOnSquare(0, startSquare);
 	}
 
 	public void UnmakeMove(Move move) {
 		int previousState = gameStateHistory.Pop();
 
-		(int, int) startSquarePos = IndexToSquarePos(move.GetStartSquare());
-		(int, int) targetSquarePos = IndexToSquarePos(move.GetTargetSquare());
+		Coord startSquare = new Coord(move.GetStartSquareIndex());
+		Coord targetSquare = new Coord(move.GetTargetSquareIndex());
 
-		this.representation[startSquarePos.Item1, startSquarePos.Item2] = this.representation[targetSquarePos.Item1, targetSquarePos.Item2];
-		this.representation[targetSquarePos.Item1, targetSquarePos.Item2] = GetTakenPieceType();
+		PlacePieceOnSquare(GetSquareContents(targetSquare), startSquare);
+		PlacePieceOnSquare(GetTakenPieceType(), targetSquare);
 
 		this.GameState = previousState;
 	}
 
-	public int GetSquareContents(int rank, int file) {
-		return representation[rank, file];
+	public int GetSquareContents(Coord coord) {
+		return representation[coord.GetRank(), coord.GetFile()];
 	}
 
-	public int GetSquareContents((int, int) squarePos) {
-		return GetSquareContents(squarePos.Item1, squarePos.Item2);
-	}
-	public int GetSquareContentsAtIndex(int index) {
-		return GetSquareContents(IndexToSquarePos(index));
-	}
-
-	public void PlacePieceOnSquare(int piece, int rank, int file) {
-		this.representation[rank, file] = piece;
+	public void PlacePieceOnSquare(int piece, Coord coord) {
+		this.representation[coord.GetRank(), coord.GetFile()] = piece;
 	}
 
 	public bool WhiteMovesNext() {
@@ -118,9 +111,9 @@ public class Board {
 	//second bit: mod 4 > 1
 	//third bit: mod 8 > 3
 	//fourth bit: mod 16 > 7
-	public (bool, bool, bool, bool) GetAllCastlingAvailibility() {
+	public bool[] GetAllCastlingAvailibility() {
 		int availibility = (GameState & castlingMask) >> 1;
-		return (availibility % 2 > 0, availibility % 4 > 1, availibility % 8 > 3, availibility % 16 > 7);
+		return new bool[]{ availibility % 2 > 0, availibility % 4 > 1, availibility % 8 > 3, availibility % 16 > 7};
 	}
 
 	public void SetEnPassantTarget(int file) {
@@ -134,9 +127,8 @@ public class Board {
 	}
 
 	public string GetEnPassantTargetName() {
-		int file = GetEnPassantTarget();
-		int rank = WhiteMovesNext() ? 6 : 3;
-		return SquarePosToIndex(rank, file) == 0 ? "-" : SquarePosToSquareName(rank, file);
+		Coord coord = new Coord(WhiteMovesNext() ? 6 : 3, GetEnPassantTarget());
+		return coord.GetIndex() == 0 ? "-" : coord.ToString();
 	}
 
 	public void SetTakenPieceType(int pieceType) {
@@ -169,67 +161,18 @@ public class Board {
 		this.GameState |= count << 17;
 	}
 
-	public static string SquarePosToSquareName(int rank, int file) {
-		const string letters = "abcdefgh";
-
-		if (file > FILE_COUNT - 1)
-			throw new System.ArgumentException("Square's file cannot be greater than the board width");
-
-		return letters[file].ToString() + (rank + 1).ToString();
-	}
-
-	public static string SquarePosToSquareName((int, int) squarePos) {
-		return SquarePosToSquareName(squarePos.Item1, squarePos.Item2);
-	}
-
-	public static (int, int) SquareNameToSquarePos(string name) {
-		const string letters = "abcdefgh";
-
-		if (name.Length != 2)
-			throw new System.ArgumentException($"{name} is not a valid square name");
-		if (!letters.Contains(name[0].ToString()))
-			throw new System.ArgumentException($"{name[0]} is not a valid file for a square name");
-		if (!char.IsDigit(name[1]))
-			throw new System.ArgumentException($"{name[1]} is not a valid rank for a square name");
-
-		int rank = int.Parse(name[1].ToString());
-
-		if (rank < 0 || rank > 7)
-			throw new System.ArgumentException($"{name[1]} is not a valid rank for a square name");
-
-		int file = letters.IndexOf(name[0]);
-
-		return (rank, file);
-	}
-
 	// Iterate over board and return all instances of the given PieceType of the given color
 	// eg. GetPieceTypes(false, Piece.PieceType.Pawn) will return all black pawns on the board
 	public List<int> GetPieceTypes(bool getWhitePieces, Piece.PieceType pieceType) {
 		List<int> toReturn = new List<int>();
 		for (int rank = 0; rank < RANK_COUNT; rank++)
 			for (int file = 0; file < FILE_COUNT; file++) {
-				int piece = GetSquareContents(rank, file);
+				Coord coord = new Coord(rank, file);
+				int piece = GetSquareContents(coord);
 				if (piece != 0 && Piece.IsWhite(piece) == getWhitePieces && Piece.GetPieceType(piece) == pieceType)
-					toReturn.Add(SquarePosToIndex(rank, file));
+					toReturn.Add(coord.GetIndex());
 			}
 		return toReturn;
-	}
-
-	// a1 = 0, h1 = 7 h8 = 63
-	public static int SquarePosToIndex(int rank, int file) {
-		return rank * 8 + file;
-	}
-
-	public static int SquarePosToIndex((int, int) squarePos) {
-		return SquarePosToIndex(squarePos.Item1, squarePos.Item2);
-	}
-
-	public static (int, int) IndexToSquarePos(int index) {
-		return ((int)Math.Floor((float)index / RANK_COUNT), index % FILE_COUNT);
-	}
-
-	public static string IndexToSquareName(int index) {
-		return SquarePosToSquareName(IndexToSquarePos(index));
 	}
 
 	public static bool IsIndexInBounds(int index) {

@@ -36,15 +36,23 @@ public class Move {
 		this.representation = (ushort)(startSquare | targetSquare << 6);
 	}
 
+	public Move(Coord startSquare, Coord targetSquare) {
+		this.representation = (ushort)(startSquare.GetIndex() | targetSquare.GetIndex() << 6);
+	}
+
 	public Move(int startSquare, int targetSquare, int flag) {
 		this.representation = (ushort)(startSquare | targetSquare << 6 | flag << 12);
 	}
 
-	public int GetStartSquare() {
+	public Move(Coord startSquare, Coord targetSquare, int flag) {
+		this.representation = (ushort)(startSquare.GetIndex() | targetSquare.GetIndex() << 6 | flag << 12);
+	}
+
+	public int GetStartSquareIndex() {
 		return fromSquareMask & representation;
 	}
 
-	public int GetTargetSquare() {
+	public int GetTargetSquareIndex() {
 		return (toSquareMask & representation) >> 6;
 	}
 
@@ -61,10 +69,10 @@ public class Move {
 	}
 
 	public override string ToString() {
-		return $"From {GetStartSquare()} to {GetTargetSquare()}";
+		return $"From {GetStartSquareIndex()} to {GetTargetSquareIndex()}";
 	}
 
 	public string ToString(int piece) {
-		return $"{Piece.GetPieceTypeAbbreviation(piece)}{Board.IndexToSquareName(this.GetTargetSquare())}";
+		return $"{Piece.GetPieceTypeAbbreviation(piece)}{new Coord(GetTargetSquareIndex())}";
 	}
 }

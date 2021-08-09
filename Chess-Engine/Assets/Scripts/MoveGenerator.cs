@@ -38,33 +38,50 @@ public class MoveGenerator {
 	private void GeneratePawnMoves() {
 		List<int> pawns = board.GetPieceTypes(this.whiteMovesNext, Piece.PieceType.Pawn);
 
-		foreach (int pawn in pawns) {
-			int target = this.whiteMovesNext ? pawn + 8 : pawn - 8;
+		foreach (int pawnIndex in pawns) {
+			int targetIndex = this.whiteMovesNext ? pawnIndex + 8 : pawnIndex - 8;
 			// This is temporary while promotion is not implemented
-			if (target < 0 || target > 63)
+			if (targetIndex < 0 || targetIndex > 63)
 				continue;
-			(int, int) targetPos = Board.IndexToSquarePos(target);
-			(int, int) pawnPos = Board.IndexToSquarePos(pawn);
-			int targetPiece = board.GetSquareContents(targetPos);
 
-			if (board.GetSquareContents(targetPos) == 0) {
-				AddPawnMoveIfLegal(targetPiece, pawn, targetPos, false);
+			Coord target = new Coord(targetIndex);
+			Coord pawn = new Coord(pawnIndex);
+			int targetPiece = board.GetSquareContents(target);
 
-				if ((this.whiteMovesNext && pawnPos.Item1 == 1) || (!this.whiteMovesNext && pawnPos.Item1 == 6)) {
-					(int, int) doubleMoveTargetPos = Board.IndexToSquarePos(this.whiteMovesNext ? pawn + 16 : pawn - 16);
-					AddPawnMoveIfLegal(board.GetSquareContents(doubleMoveTargetPos), pawn, doubleMoveTargetPos, false);
+			if (targetPiece == 0) {
+				Move move = new Move(pawnIndex, targetIndex);
+				if (!MoveAllowsKingToBeTaken(move))
+					moves.Add(move);
+
+				if ((this.whiteMovesNext && pawn.GetRank() == 1) || (!this.whiteMovesNext && pawn.GetRank() == 6)) {
+					Coord doubleMoveTarget = new Coord(this.whiteMovesNext ? pawnIndex + 16 : pawnIndex - 16);
+					move = new Move(pawnIndex, doubleMoveTarget.GetIndex(), (int)Move.Flag.PawnTwoForward);
+					if (board.GetSquareContents(doubleMoveTarget) == 0 && !MoveAllowsKingToBeTaken(move))
+						moves.Add(move);
 				}
 			}
 
-			target = this.whiteMovesNext ? pawn + 7 : pawn - 7;
-			targetPiece = board.GetSquareContents(Board.IndexToSquarePos(target));
-			if (Math.Abs(pawnPos.Item1 - Board.IndexToSquarePos(target).Item1) == 1)
-				AddPawnMoveIfLegal(targetPiece, pawn, Board.IndexToSquarePos(target), true);
+			targetIndex = this.whiteMovesNext ? pawnIndex + 7 : pawnIndex - 7;
+			target = new Coord(targetIndex);
+			targetPiece = board.GetSquareContents(target);
 
-			target = this.whiteMovesNext ? pawn + 9 : pawn - 9;
-			targetPiece = board.GetSquareContents(Board.IndexToSquarePos(target));
-			if (Math.Abs(pawnPos.Item1 - Board.IndexToSquarePos(target).Item1) == 1)
-				AddPawnMoveIfLegal(targetPiece, pawn, Board.IndexToSquarePos(target), true);
+			if (Math.Abs(pawn.GetFile() - target.GetFile()) == 1 &&
+				targetPiece != 0 && Piece.IsWhite(targetPiece) != board.WhiteMovesNext()) {
+				Move move = new Move(pawnIndex, targetIndex);
+				if (!MoveAllowsKingToBeTaken(move))
+					moves.Add(move);
+			}
+
+			targetIndex = this.whiteMovesNext ? pawnIndex + 9 : pawnIndex - 9;
+			target = new Coord(targetIndex);
+			targetPiece = board.GetSquareContents(target);
+
+			if (Math.Abs(pawn.GetFile() - target.GetFile()) == 1 &&
+				targetPiece != 0 && Piece.IsWhite(targetPiece) != board.WhiteMovesNext()) {
+				Move move = new Move(pawnIndex, targetIndex);
+				if (!MoveAllowsKingToBeTaken(move))
+					moves.Add(move);
+			}
 
 		}
 	}
@@ -72,18 +89,18 @@ public class MoveGenerator {
 	private void GenerateKnightMoves() {
 		List<int> knights = board.GetPieceTypes(this.whiteMovesNext, Piece.PieceType.Knight);
 
-		foreach (int knight in knights) {
-			foreach (int target in KNIGHT_TARGETS) {
-				int targetIndex = knight + target;
+		foreach (int knightIndex in knights) {
+			foreach (int knightTarget in KNIGHT_TARGETS) {
+				int targetIndex = knightIndex + knightTarget;
 				if (targetIndex < 0 || targetIndex > 63)
 					continue;
 
-				(int, int) knightSquare = Board.IndexToSquarePos(knight);
-				(int, int) targetSquare = Board.IndexToSquarePos(targetIndex);
-				if (Math.Abs(knightSquare.Item1 - targetSquare.Item1) + Math.Abs(knightSquare.Item2 - targetSquare.Item2) != 3)
+				Coord knight = new Coord(knightIndex);
+				Coord target = new Coord(targetIndex);
+				if (Math.Abs(knight.GetRank() - target.GetRank()) + Math.Abs(knight.GetFile() - target.GetFile()) != 3)
 					continue;
 
-				AddMoveIfLegal(board.GetSquareContents(targetSquare), knight, targetSquare);
+				AddMoveIfLegal(board.GetSquareContents(target), knightIndex, target);
 			}
 		}
 	}
@@ -96,22 +113,24 @@ public class MoveGenerator {
 			return;
 		}
 
-		int king = kings[0];
+		int kingIndex = kings[0];
 
 		foreach (int direction in KING_MOVES) {
-			int target = king + direction;
-			if (target < 0 || target > 63)
+			int targetIndex = kingIndex + direction;
+			if (targetIndex < 0 || targetIndex > 63)
 				continue;
 
-			(int, int) kingPos = Board.IndexToSquarePos(king);
-			(int, int) targetPos = Board.IndexToSquarePos(target);
-			int targetContents = board.GetSquareContents(targetPos);
+			Coord king = new Coord(kingIndex);
+			Coord target = new Coord(kingIndex);
+			int targetContents = board.GetSquareContents(target);
 
-			if (Math.Abs(kingPos.Item1 - targetPos.Item1) + Math.Abs(kingPos.Item2 - targetPos.Item2) > 2)
+			if (Math.Abs(king.GetRank() - target.GetRank()) + Math.Abs(king.GetFile() - target.GetFile()) > 2)
 				continue;
 
-			AddMoveIfLegal(targetContents, king, targetPos);
+			AddMoveIfLegal(targetContents, kingIndex, target);
 		}
+
+		//GenerateCastlingMoves(king);
 	}
 
 	private void GenerateQueenMoves() {
@@ -140,14 +159,14 @@ public class MoveGenerator {
 	private void GenerateDiagonalMovesForPiece(int piece) {
 		foreach (int direction in DIAGONAL_MOVES) {
 			for (int i = piece + direction; i < 63 && i > 0; i += direction) {
-				(int, int) targetPos = Board.IndexToSquarePos(i);
+				Coord target = new Coord(i);
 
-				if (BoardUI.IsSquareLight(targetPos) != BoardUI.IsSquareLight(Board.IndexToSquarePos(piece)))
+				if (BoardUI.IsSquareLight(target) != BoardUI.IsSquareLight(new Coord(piece)))
 					break;
 
-				int targetContents = board.GetSquareContents(targetPos);
+				int targetContents = board.GetSquareContents(target);
 
-				AddMoveIfLegal(targetContents, piece, targetPos);
+				AddMoveIfLegal(targetContents, piece, target);
 
 				if (targetContents != 0)
 					break;
@@ -158,19 +177,32 @@ public class MoveGenerator {
 	private void GenerateStraightMovesForPiece(int piece) {
 		foreach (int direction in STRAIGHT_MOVES) {
 			for (int i = piece + direction; i < 63 && i > 0; i += direction) {
-				(int, int) targetPos = Board.IndexToSquarePos(i);
+				Coord target = new Coord(i);
 
-				if (Math.Abs(direction) == 1 && targetPos.Item1 != Board.IndexToSquarePos(piece).Item1)
+				if (Math.Abs(direction) == 1 && target.GetRank() != new Coord(piece).GetRank())
 					break;
-				if (Math.Abs(direction) == 8 && targetPos.Item2 != Board.IndexToSquarePos(piece).Item2)
+				if (Math.Abs(direction) == 8 && target.GetFile() != new Coord(piece).GetFile())
 					break;
 
-				int targetContents = board.GetSquareContents(targetPos);
+				int targetContents = board.GetSquareContents(target);
 
-				AddMoveIfLegal(targetContents, piece, targetPos);
+				AddMoveIfLegal(targetContents, piece, target);
 
 				if (targetContents != 0)
 					break;
+			}
+		}
+	}
+
+	private void GenerateCastlingMoves(int king) {
+		bool[] castlingRights = board.GetAllCastlingAvailibility();
+
+		for (int i = whiteMovesNext ? 0 : 2; i < (whiteMovesNext ? 2 : 4); i++) {
+			if (castlingRights[i]) {
+				// king side castling
+				if (i % 2 == 1) {
+					//if (!MoveAllowsKingToBeTaken(new Move()))
+				}
 			}
 		}
 	}
@@ -194,13 +226,13 @@ public class MoveGenerator {
 		MoveGenerator moveGenerator = new MoveGenerator();
 		List<Move> movesAtNextDepth = moveGenerator.GenerateMoves(testBoard, false);
 
-		if (move.GetStartSquare() == king) {
+		if (move.GetStartSquareIndex() == king) {
 			for (int i = 0; i < movesAtNextDepth.Count; i++)
-				if (movesAtNextDepth[i].GetTargetSquare() == move.GetTargetSquare())
+				if (movesAtNextDepth[i].GetTargetSquareIndex() == move.GetTargetSquareIndex())
 					return true;
 		} else {
 			for (int i = 0; i < movesAtNextDepth.Count; i++)
-				if (movesAtNextDepth[i].GetTargetSquare() == king)
+				if (movesAtNextDepth[i].GetTargetSquareIndex() == king)
 					return true;
 		}
 
@@ -209,16 +241,11 @@ public class MoveGenerator {
 		return false;
 	}
 
-	private void AddMoveIfLegal(int targetPiece, int movingPiece, (int, int) targetPos) {
+	private void AddMoveIfLegal(int targetPiece, int movingPiece, Coord target) {
 		if (targetPiece == 0 || Piece.IsWhite(targetPiece) != board.WhiteMovesNext()) {
-			Move move = new Move(movingPiece, Board.SquarePosToIndex(targetPos));
+			Move move = new Move(movingPiece, target.GetIndex());
 			if (!MoveAllowsKingToBeTaken(move))
 				moves.Add(move);
 		}
-	}
-
-	private void AddPawnMoveIfLegal(int targetPiece, int movingPawn, (int, int) targetPos, bool isAttackingMove) {
-		if (isAttackingMove != (targetPiece == 0))
-			AddMoveIfLegal(targetPiece, movingPawn, targetPos);
 	}
 }

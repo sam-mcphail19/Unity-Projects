@@ -41,7 +41,7 @@ public static class FenUtil {
 				if (current != currentLowered)
 					piece |= Piece.WHITE;
 
-				board.PlacePieceOnSquare(piece, rank, file);
+				board.PlacePieceOnSquare(piece, new Coord(rank, file));
 
 				file++;
 			}
@@ -59,7 +59,7 @@ public static class FenUtil {
 			if (sections[3].Equals("-"))
 				board.SetEnPassantTarget(0);
 			else 
-				board.SetEnPassantTarget(Board.SquareNameToSquarePos(sections[3]).Item2);
+				board.SetEnPassantTarget(Coord.SquareNameToSquarePos(sections[3]).GetFile());
 		}
 
 		if (sections.Length > 4)
