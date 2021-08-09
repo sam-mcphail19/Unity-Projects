@@ -63,4 +63,8 @@ public class Move {
 	public override string ToString() {
 		return $"From {GetStartSquare()} to {GetTargetSquare()}";
 	}
+
+	public string ToString(int piece) {
+		return $"{Piece.GetPieceTypeAbbreviation(piece)}{Board.IndexToSquareName(this.GetTargetSquare())}";
+	}
 }

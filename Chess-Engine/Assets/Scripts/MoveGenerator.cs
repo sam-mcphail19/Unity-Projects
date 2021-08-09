@@ -103,8 +103,12 @@ public class MoveGenerator {
 			if (target < 0 || target > 63)
 				continue;
 
+			(int, int) kingPos = Board.IndexToSquarePos(king);
 			(int, int) targetPos = Board.IndexToSquarePos(target);
-			int targetContents = board.GetSquareContents(targetPos); ;
+			int targetContents = board.GetSquareContents(targetPos);
+
+			if (Math.Abs(kingPos.Item1 - targetPos.Item1) + Math.Abs(kingPos.Item2 - targetPos.Item2) > 2)
+				continue;
 
 			AddMoveIfLegal(targetContents, king, targetPos);
 		}
@@ -214,13 +218,7 @@ public class MoveGenerator {
 	}
 
 	private void AddPawnMoveIfLegal(int targetPiece, int movingPawn, (int, int) targetPos, bool isAttackingMove) {
-		if (isAttackingMove) {
-			if (targetPiece != 0) {
-				Move move = new Move(movingPawn, Board.SquarePosToIndex(targetPos));
-				if (!MoveAllowsKingToBeTaken(move))
-					moves.Add(move);
-			}
-		} else
+		if (isAttackingMove != (targetPiece == 0))
 			AddMoveIfLegal(targetPiece, movingPawn, targetPos);
 	}
 }

@@ -152,12 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca48d04acd1421448a79cbb2b6a5ef4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testFen: 
-  depth: 0
-  divide: 0
-  expectedResults: {fileID: 0}
   perftTestSuite: {fileID: 4900000, guid: c3cdeadedd543b542a8a3bdf58a7f175, type: 3}
-  enableTimingStats: 0
 --- !u!4 &1166123706
 Transform:
   m_ObjectHideFlags: 0

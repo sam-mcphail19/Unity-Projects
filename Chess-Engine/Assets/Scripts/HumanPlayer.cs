@@ -75,9 +75,6 @@ public class HumanPlayer : Player {
 					CancelPieceSelection();
 					HandlePieceSelection(mousePos);
 				} else {
-					Debug.Log($"Attempting to place piece: {Piece.GetPieceType(board.GetSquareContents(selectedPieceSquare))}" +
-						$" on square: {Board.SquarePosToSquareName(selectedPieceSquare)}" +
-						$" to new square: {Board.SquarePosToSquareName(targetSquare)}");
 					TryMakeMove(selectedPieceSquare, targetSquare);
 				}
 			}
@@ -96,7 +93,6 @@ public class HumanPlayer : Player {
 					boardUI.HighlightLegalMoves(moveGenerator.GenerateMoves(board), selectedPieceSquare);
 					boardUI.SelectSquare(selectedPieceSquare);
 					currentState = InputState.DraggingPiece;
-					Debug.Log($"Piece Selected: {Piece.GetPieceType(piece)} on square: {Board.SquarePosToSquareName(selectedPieceSquare)}");
 				}
 			}
 		}
@@ -134,9 +130,6 @@ public class HumanPlayer : Player {
 		}
 
 		if (moveIsLegal) {
-			Debug.Log($"Moving piece: {Piece.GetPieceType(board.GetSquareContents(selectedPieceSquare))}" +
-						$" on square: {Board.SquarePosToSquareName(selectedPieceSquare)}" +
-						$" to new square: {Board.SquarePosToSquareName(targetSquare)}");
 			ChoseMove(chosenMove);
 			currentState = InputState.None;
 		} else {

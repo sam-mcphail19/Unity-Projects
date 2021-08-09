@@ -58,4 +58,21 @@ public static class Piece {
 		King,
 		None
 	}
+
+	public static string GetPieceTypeAbbreviation(PieceType type) {
+		return (type) switch
+		{
+			PieceType.Pawn => "",
+			PieceType.Knight => "N",
+			PieceType.Bishop => "B",
+			PieceType.Rook => "R",
+			PieceType.Queen => "Q",
+			PieceType.King => "K",
+			_ => throw new System.ArgumentException($"Piece: {type} is not a valid piece type"),
+		};
+	}
+
+	public static string GetPieceTypeAbbreviation(int type) {
+		return GetPieceTypeAbbreviation(GetPieceType(type));
+	}
 }

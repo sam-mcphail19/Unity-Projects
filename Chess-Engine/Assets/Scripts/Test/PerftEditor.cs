@@ -10,7 +10,7 @@ public class PerftEditor : Editor {
 		DrawDefaultInspector();
 		GUILayout.Space(10);
 		if (GUILayout.Button("Run Suite")) {
-			perft.RunTests();
+			perft.RunSuite();
 		}
 	}
 

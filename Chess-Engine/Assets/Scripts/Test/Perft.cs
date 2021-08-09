@@ -25,11 +25,17 @@ public class Perft : MonoBehaviour {
 
 	}
 
-	public void RunTests() {
+	public void RunSuite() {
+		StartCoroutine(RunTests());
+	}
+
+	public IEnumerator RunTests() {
 		Test[] tests = GetSuiteTests(perftTestSuite);
 		Debug.Log($"Test Suite Loaded. {tests.Length} tests loaded");
-		foreach (Test test in tests)
+		foreach (Test test in tests) {
+			yield return new WaitForEndOfFrame();
 			RunTest(test);
+		}
 	}
 
 	public void RunTest(Test test) {
@@ -37,13 +43,13 @@ public class Perft : MonoBehaviour {
 
 		for (int i = 1; i < test.depth; i++) {
 			int nodesFound = Search(i);
-			if(nodesFound == test.expectedNodeCounts[i])
+			if(nodesFound == test.expectedNodeCounts[i-1])
 				Debug.Log($"At depth: {i}\n" +
-					$"Nodes Found: {nodesFound}, Nodes Expected: {test.expectedNodeCounts[i]}\n" +
+					$"Nodes Found: {nodesFound}, Nodes Expected: {test.expectedNodeCounts[i-1]}. " +
 					$"Test Succeeded for depth {i}");
 			else
 				Debug.Log($"At depth: {i}\n" +
-					$"Nodes Found: {nodesFound}, Nodes Expected: {test.expectedNodeCounts[i]}\n" +
+					$"Nodes Found: {nodesFound}, Nodes Expected: {test.expectedNodeCounts[i-1]}. " +
 					$"Test Failed for depth {i}");
 		}
 	}
