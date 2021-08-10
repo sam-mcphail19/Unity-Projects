@@ -100,7 +100,7 @@ public class MoveGenerator {
 				if (Math.Abs(knight.GetRank() - target.GetRank()) + Math.Abs(knight.GetFile() - target.GetFile()) != 3)
 					continue;
 
-				AddMoveIfLegal(board.GetSquareContents(target), knightIndex, target);
+				AddMoveIfLegal(knight, target);
 			}
 		}
 	}
@@ -121,13 +121,12 @@ public class MoveGenerator {
 				continue;
 
 			Coord king = new Coord(kingIndex);
-			Coord target = new Coord(kingIndex);
-			int targetContents = board.GetSquareContents(target);
+			Coord target = new Coord(targetIndex);
 
-			if (Math.Abs(king.GetRank() - target.GetRank()) + Math.Abs(king.GetFile() - target.GetFile()) > 2)
+			if (Math.Abs(king.GetRank() - target.GetRank()) > 1 || Math.Abs(king.GetFile() - target.GetFile()) > 1)
 				continue;
 
-			AddMoveIfLegal(targetContents, kingIndex, target);
+			AddMoveIfLegal(king, target);
 		}
 
 		GenerateCastlingMoves(kingIndex);
@@ -156,17 +155,17 @@ public class MoveGenerator {
 			GenerateDiagonalMovesForPiece(bishop);
 	}
 
-	private void GenerateDiagonalMovesForPiece(int piece) {
+	private void GenerateDiagonalMovesForPiece(int pieceIndex) {
 		foreach (int direction in DIAGONAL_MOVES) {
-			for (int i = piece + direction; i < 63 && i > 0; i += direction) {
+			for (int i = pieceIndex + direction; i < 63 && i > 0; i += direction) {
 				Coord target = new Coord(i);
 
-				if (BoardUI.IsSquareLight(target) != BoardUI.IsSquareLight(new Coord(piece)))
+				if (BoardUI.IsSquareLight(target) != BoardUI.IsSquareLight(new Coord(pieceIndex)))
 					break;
 
 				int targetContents = board.GetSquareContents(target);
 
-				AddMoveIfLegal(targetContents, piece, target);
+				AddMoveIfLegal(new Coord(pieceIndex), target);
 
 				if (targetContents != 0)
 					break;
@@ -174,19 +173,19 @@ public class MoveGenerator {
 		}
 	}
 
-	private void GenerateStraightMovesForPiece(int piece) {
+	private void GenerateStraightMovesForPiece(int pieceIndex) {
 		foreach (int direction in STRAIGHT_MOVES) {
-			for (int i = piece + direction; i < 63 && i > 0; i += direction) {
+			for (int i = pieceIndex + direction; i < 63 && i > 0; i += direction) {
 				Coord target = new Coord(i);
 
-				if (Math.Abs(direction) == 1 && target.GetRank() != new Coord(piece).GetRank())
+				if (Math.Abs(direction) == 1 && target.GetRank() != new Coord(pieceIndex).GetRank())
 					break;
-				if (Math.Abs(direction) == 8 && target.GetFile() != new Coord(piece).GetFile())
+				if (Math.Abs(direction) == 8 && target.GetFile() != new Coord(pieceIndex).GetFile())
 					break;
 
 				int targetContents = board.GetSquareContents(target);
 
-				AddMoveIfLegal(targetContents, piece, target);
+				AddMoveIfLegal(new Coord(pieceIndex), target);
 
 				if (targetContents != 0)
 					break;
@@ -194,7 +193,7 @@ public class MoveGenerator {
 		}
 	}
 
-	private void GenerateCastlingMoves(int king) {
+	private void GenerateCastlingMoves(int kingIndex) {
 		bool[] castlingRights = board.GetAllCastlingAvailibility();
 
 		int i = whiteMovesNext ? 0 : 2;
@@ -203,22 +202,22 @@ public class MoveGenerator {
 		// King side castling
 		if (castlingRights[i]) {
 			// Make sure inbetween square and result square are empty and not attacked
-			if (board.GetSquareContents(new Coord(rank, 5)) == 0 && 
-				board.GetSquareContents(new Coord(rank, 6)) == 0 && 
-				!MoveAllowsKingToBeTaken(new Move(king, king + 1)) &&
-				!MoveAllowsKingToBeTaken(new Move(king, king + 2))) {
-				moves.Add(new Move(king, king + 2, Move.Flag.Castling));
+			if (board.GetSquareContents(new Coord(rank, 5)) == 0 &&
+				board.GetSquareContents(new Coord(rank, 6)) == 0 &&
+				!MoveAllowsKingToBeTaken(new Move(kingIndex, kingIndex + 1)) &&
+				!MoveAllowsKingToBeTaken(new Move(kingIndex, kingIndex + 2))) {
+				moves.Add(new Move(kingIndex, kingIndex + 2, Move.Flag.Castling));
 			}
 		}
 
 		// Queen side castling
-		if (castlingRights[i+1]) {
+		if (castlingRights[i + 1]) {
 			// Make sure inbetween squares and result square are empty and not attacked
 			if (board.GetSquareContents(new Coord(rank, 1)) == 0 &&
 				board.GetSquareContents(new Coord(rank, 2)) == 0 &&
-				!MoveAllowsKingToBeTaken(new Move(king, king - 1)) &&
-				!MoveAllowsKingToBeTaken(new Move(king, king - 2))) {
-				moves.Add(new Move(king, king - 2, Move.Flag.Castling));
+				!MoveAllowsKingToBeTaken(new Move(kingIndex, kingIndex - 1)) &&
+				!MoveAllowsKingToBeTaken(new Move(kingIndex, kingIndex - 2))) {
+				moves.Add(new Move(kingIndex, kingIndex - 2, Move.Flag.Castling));
 			}
 		}
 	}
@@ -228,11 +227,10 @@ public class MoveGenerator {
 			return false;
 
 		List<int> kings = board.GetPieceTypes(this.whiteMovesNext, Piece.PieceType.King);
-		if (kings.Count < 1) {
-			string movingSide = whiteMovesNext ? "White" : "Black";
-			//Debug.LogError($"No Kings on the board for {movingSide}");
+
+		//TODO: Remove when checkmate is implemented
+		if (kings.Count < 1)
 			return true;
-		}
 
 		int king = kings[0];
 
@@ -252,16 +250,23 @@ public class MoveGenerator {
 					return true;
 		}
 
-
-
 		return false;
 	}
 
-	private void AddMoveIfLegal(int targetPiece, int movingPiece, Coord target) {
+	private void AddMoveIfLegal(Coord startSquare, Coord targetSquare) {
+		int targetPiece = board.GetSquareContents(targetSquare);
 		if (targetPiece == 0 || Piece.IsWhite(targetPiece) != board.WhiteMovesNext()) {
-			Move move = new Move(movingPiece, target.GetIndex());
+			Move move = new Move(startSquare, targetSquare);
 			if (!MoveAllowsKingToBeTaken(move))
 				moves.Add(move);
 		}
+	}
+
+	private void LogMoves() {
+		string movesString = "Generated Moves: ";
+		foreach (Move move in moves) {
+			movesString += $"{move.ToString(board.GetSquareContents(new Coord(move.GetStartSquareIndex())))}, ";
+		}
+		Debug.Log(movesString.Trim(' ').Trim(','));
 	}
 }

@@ -113,6 +113,8 @@ public class HumanPlayer : Player {
 		MoveGenerator moveGenerator = new MoveGenerator();
 		bool wantsKnightPromotion = Input.GetKey(KeyCode.LeftAlt);
 
+		Debug.Log($"{moveGenerator.GenerateMoves(board).Count} legal moves found");
+
 		foreach (Move move in moveGenerator.GenerateMoves(board)) {
 			if (move.GetStartSquareIndex() == startSquare.GetIndex() && move.GetTargetSquareIndex() == targetSquare.GetIndex()) {
 				if (move.IsPromotion()) {

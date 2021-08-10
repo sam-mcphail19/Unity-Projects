@@ -55,6 +55,30 @@ public class Board {
 		int pieceType = (int)Piece.GetPieceType(GetSquareContents(targetSquare));
 		SetTakenPieceType(pieceType);
 
+		if (Piece.GetPieceType(GetSquareContents(startSquare)) == Piece.PieceType.King) {
+			if (WhiteMovesNext()) {
+				SetCastlingAvailability(CastlingDirection.WhiteKing, false);
+				SetCastlingAvailability(CastlingDirection.WhiteQueen, false);
+			} else {
+				SetCastlingAvailability(CastlingDirection.BlackKing, false);
+				SetCastlingAvailability(CastlingDirection.BlackQueen, false);
+			}
+		}
+
+		if (Piece.GetPieceType(GetSquareContents(startSquare)) == Piece.PieceType.Rook) {
+			if (WhiteMovesNext()) {
+				if(startSquare.GetRank() == 0)
+					SetCastlingAvailability(CastlingDirection.WhiteQueen, false);
+				else if (startSquare.GetRank() == 7)
+					SetCastlingAvailability(CastlingDirection.WhiteKing, false);
+			} else {
+				if (startSquare.GetRank() == 0)
+					SetCastlingAvailability(CastlingDirection.BlackQueen, false);
+				else if (startSquare.GetRank() == 7)
+					SetCastlingAvailability(CastlingDirection.BlackKing, false);
+			}
+		}
+
 		SetWhiteMovesNext(!WhiteMovesNext());
 		SetFiftyMoveRuleCounter(GetFiftyMoveRuleCounter() + 1);
 		if (WhiteMovesNext())
