@@ -15,7 +15,7 @@ public class PieceManager : MonoBehaviour {
 				5 => pieces.w_bishop,
 				6 => pieces.w_rook,
 				7 => pieces.w_queen,
-				_ => throw new System.ArgumentException($"Piece: {piece} is not a valid piece type"),
+				_ => throw new System.ArgumentException($"Piece: {piece & Piece.pieceTypeMask} is not a valid piece type"),
 			};
 		}
 

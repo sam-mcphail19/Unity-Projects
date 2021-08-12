@@ -49,38 +49,29 @@ public class MoveGenerator {
 			int targetPiece = board.GetSquareContents(target);
 
 			if (targetPiece == 0) {
-				Move move = new Move(pawnIndex, targetIndex);
-				if (!MoveAllowsKingToBeTaken(move))
-					moves.Add(move);
+				AddPawnMove(new Move(pawn, target));
 
 				if ((this.whiteMovesNext && pawn.GetRank() == 1) || (!this.whiteMovesNext && pawn.GetRank() == 6)) {
-					Coord doubleMoveTarget = new Coord(this.whiteMovesNext ? pawnIndex + 16 : pawnIndex - 16);
-					move = new Move(pawnIndex, doubleMoveTarget.GetIndex(), Move.Flag.PawnTwoForward);
-					if (board.GetSquareContents(doubleMoveTarget) == 0 && !MoveAllowsKingToBeTaken(move))
-						moves.Add(move);
+					target = new Coord(this.whiteMovesNext ? pawnIndex + 16 : pawnIndex - 16);
+					if (board.GetSquareContents(target) == 0)
+						AddPawnMove(new Move(pawn, target, Move.Flag.PawnTwoForward));
 				}
 			}
 
-			targetIndex = this.whiteMovesNext ? pawnIndex + 7 : pawnIndex - 7;
-			target = new Coord(targetIndex);
+			target = new Coord(this.whiteMovesNext ? pawnIndex + 7 : pawnIndex - 7);
 			targetPiece = board.GetSquareContents(target);
 
 			if (Math.Abs(pawn.GetFile() - target.GetFile()) == 1 &&
 				targetPiece != 0 && Piece.IsWhite(targetPiece) != board.WhiteMovesNext()) {
-				Move move = new Move(pawnIndex, targetIndex);
-				if (!MoveAllowsKingToBeTaken(move))
-					moves.Add(move);
+				AddPawnMove(new Move(pawn, target));
 			}
 
-			targetIndex = this.whiteMovesNext ? pawnIndex + 9 : pawnIndex - 9;
-			target = new Coord(targetIndex);
+			target = new Coord(this.whiteMovesNext ? pawnIndex + 9 : pawnIndex - 9);
 			targetPiece = board.GetSquareContents(target);
 
 			if (Math.Abs(pawn.GetFile() - target.GetFile()) == 1 &&
 				targetPiece != 0 && Piece.IsWhite(targetPiece) != board.WhiteMovesNext()) {
-				Move move = new Move(pawnIndex, targetIndex);
-				if (!MoveAllowsKingToBeTaken(move))
-					moves.Add(move);
+				AddPawnMove(new Move(pawn, target));
 			}
 
 		}
@@ -260,6 +251,25 @@ public class MoveGenerator {
 			if (!MoveAllowsKingToBeTaken(move))
 				moves.Add(move);
 		}
+	}
+
+	private void AddPawnMove(Move move) {
+		if (MoveAllowsKingToBeTaken(move))
+			return;
+
+		Coord startSquare = new Coord(move.GetStartSquareIndex());
+		Coord targetSquare = new Coord(move.GetTargetSquareIndex());
+
+		if (targetSquare.GetRank() == (this.whiteMovesNext ? 7 : 0)) {
+			moves.Add(new Move(startSquare, targetSquare, Move.Flag.PromoteToQueen));
+			moves.Add(new Move(startSquare, targetSquare, Move.Flag.PromoteToKnight));
+			moves.Add(new Move(startSquare, targetSquare, Move.Flag.PromoteToRook));
+			moves.Add(new Move(startSquare, targetSquare, Move.Flag.PromoteToBishop));
+		} else {
+			moves.Add(move);
+		}
+
+
 	}
 
 	private void LogMoves() {

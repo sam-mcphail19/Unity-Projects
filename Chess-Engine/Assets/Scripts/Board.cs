@@ -67,7 +67,7 @@ public class Board {
 
 		if (Piece.GetPieceType(GetSquareContents(startSquare)) == Piece.PieceType.Rook) {
 			if (WhiteMovesNext()) {
-				if(startSquare.GetRank() == 0)
+				if (startSquare.GetRank() == 0)
 					SetCastlingAvailability(CastlingDirection.WhiteQueen, false);
 				else if (startSquare.GetRank() == 7)
 					SetCastlingAvailability(CastlingDirection.WhiteKing, false);
@@ -79,28 +79,50 @@ public class Board {
 			}
 		}
 
+		if (move.GetFlag() == (int)Move.Flag.Castling) {
+			PlacePieceOnSquare(GetSquareContents(startSquare), targetSquare);
+			Coord rookSquare = null;
+			Coord rookTargetSquare = null;
+
+			// Queen side castle
+			if (targetSquare.GetFile() == 2) {
+				rookSquare = new Coord(move.GetTargetSquareIndex() - 2);
+				rookTargetSquare = new Coord(move.GetTargetSquareIndex() + 1);
+			}
+			// King side castle
+			if (targetSquare.GetFile() == 6) {
+				rookSquare = new Coord(move.GetTargetSquareIndex() + 1);
+				rookTargetSquare = new Coord(move.GetTargetSquareIndex() - 1);
+			}
+
+			PlacePieceOnSquare(GetSquareContents(rookSquare), rookTargetSquare);
+			PlacePieceOnSquare(0, rookSquare);
+		} else if (move.IsPromotion()) {
+			Piece.PieceType promotedPieceType = Piece.PieceType.None;
+			int flag = move.GetFlag();
+
+			if (flag == (int)Move.Flag.PromoteToQueen)
+				promotedPieceType = Piece.PieceType.Queen;
+			else if (flag == (int)Move.Flag.PromoteToKnight)
+				promotedPieceType = Piece.PieceType.Knight;
+			else if (flag == (int)Move.Flag.PromoteToRook)
+				promotedPieceType = Piece.PieceType.Rook;
+			else if (flag == (int)Move.Flag.PromoteToBishop)
+				promotedPieceType = Piece.PieceType.Bishop;
+
+			Piece.Color color = WhiteMovesNext() ? Piece.Color.White : Piece.Color.Black;
+			PlacePieceOnSquare(Piece.NewPiece(promotedPieceType, color), targetSquare);
+		} else {
+			PlacePieceOnSquare(GetSquareContents(startSquare), targetSquare);
+		}
+
+
+		PlacePieceOnSquare(0, startSquare);
+
 		SetWhiteMovesNext(!WhiteMovesNext());
 		SetFiftyMoveRuleCounter(GetFiftyMoveRuleCounter() + 1);
 		if (WhiteMovesNext())
 			SetMoveCounter(GetMoveCounter() + 1);
-
-		PlacePieceOnSquare(GetSquareContents(startSquare), targetSquare);
-		PlacePieceOnSquare(0, startSquare);
-
-		if (move.GetFlag() == (int)Move.Flag.Castling) {
-			// Queen side castle
-			if (targetSquare.GetFile() == 2) {
-				Coord rookSquare = new Coord(move.GetTargetSquareIndex() - 2);
-				PlacePieceOnSquare(GetSquareContents(rookSquare), new Coord(move.GetTargetSquareIndex() + 1));
-				PlacePieceOnSquare(0, rookSquare);
-			}
-			// King side castle
-			if (targetSquare.GetFile() == 6) {
-				Coord rookSquare = new Coord(move.GetTargetSquareIndex() + 1);
-				PlacePieceOnSquare(GetSquareContents(rookSquare), new Coord(move.GetTargetSquareIndex() - 1));
-				PlacePieceOnSquare(0, rookSquare);
-			}
-		}
 	}
 
 	public void UnmakeMove(Move move) {

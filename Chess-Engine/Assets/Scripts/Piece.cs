@@ -50,13 +50,13 @@ public static class Piece {
 	}
 
 	public enum PieceType {
-		Pawn,
-		Knight,
-		Bishop,
-		Rook,
-		Queen,
-		King,
-		None
+		Pawn = 1,
+		Knight = 2,
+		King = 3,
+		Bishop = 5,
+		Rook = 6,
+		Queen = 7,
+		None = 0
 	}
 
 	public static string GetPieceTypeAbbreviation(PieceType type) {
