@@ -20,7 +20,6 @@ sysinfo.txt
 *.suo
 *.user
 *.booproj
-*.meta
 
 # Unity Project Folders
 */Temp
