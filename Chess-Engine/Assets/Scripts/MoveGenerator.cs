@@ -55,21 +55,8 @@ public class MoveGenerator {
 				}
 			}
 
-			target = new Coord(this.whiteMovesNext ? pawnIndex + 7 : pawnIndex - 7);
-			targetPiece = board.GetSquareContents(target);
-
-			if (Math.Abs(pawn.GetFile() - target.GetFile()) == 1 &&
-				targetPiece != 0 && Piece.IsWhite(targetPiece) != board.WhiteMovesNext()) {
-				AddPawnMoveIfLegal(new Move(pawn, target));
-			}
-
-			target = new Coord(this.whiteMovesNext ? pawnIndex + 9 : pawnIndex - 9);
-			targetPiece = board.GetSquareContents(target);
-
-			if (Math.Abs(pawn.GetFile() - target.GetFile()) == 1 &&
-				targetPiece != 0 && Piece.IsWhite(targetPiece) != board.WhiteMovesNext()) {
-				AddPawnMoveIfLegal(new Move(pawn, target));
-			}
+			AddPawnAttackingMoveIfLegal(pawn, new Coord(this.whiteMovesNext ? pawnIndex + 7 : pawnIndex - 7));
+			AddPawnAttackingMoveIfLegal(pawn, new Coord(this.whiteMovesNext ? pawnIndex + 9 : pawnIndex - 9));
 
 			if (board.GetEnPassantTarget() != 0 && pawn.GetRank() == (whiteMovesNext ? 4 : 3)) {
 				Coord enPassantTarget = new Coord(whiteMovesNext ? 5 : 2, board.GetEnPassantTarget() - 1);
@@ -272,14 +259,23 @@ public class MoveGenerator {
 		} else {
 			moves.Add(move);
 		}
+	}
 
+	private void AddPawnAttackingMoveIfLegal(Coord pawn, Coord target) {
+		if (target.GetIndex() < 0 || target.GetIndex() > 63)
+			return;
 
+		if (Math.Abs(pawn.GetFile() - target.GetFile()) == 1) {
+			int targetPiece = board.GetSquareContents(target);
+			if (targetPiece != 0 && Piece.IsWhite(targetPiece) != board.WhiteMovesNext())
+				AddPawnMoveIfLegal(new Move(pawn, target));
+		}
 	}
 
 	private void LogMoves() {
 		string movesString = "Generated Moves: ";
 		foreach (Move move in moves) {
-			movesString += $"{move.ToString(board.GetSquareContents(new Coord(move.GetStartSquareIndex())))}, ";
+			movesString += $"{move.ToString(board)}, ";
 		}
 		Debug.Log(movesString.Trim(' ').Trim(','));
 	}

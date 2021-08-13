@@ -90,6 +90,7 @@ public class HumanPlayer : Player {
 				int piece = board.GetSquareContents(selectedPieceSquare);
 
 				if (piece != 0 && Piece.IsWhite(piece) == board.WhiteMovesNext()) {
+					Debug.Log($"{moveGenerator.GenerateMoves(board).Count} legal moves found");
 					boardUI.HighlightLegalMoves(moveGenerator.GenerateMoves(board), selectedPieceSquare);
 					boardUI.SelectSquare(selectedPieceSquare);
 					currentState = InputState.DraggingPiece;
@@ -113,8 +114,6 @@ public class HumanPlayer : Player {
 		MoveGenerator moveGenerator = new MoveGenerator();
 		bool wantsKnightPromotion = Input.GetKey(KeyCode.LeftAlt);
 
-		Debug.Log($"{moveGenerator.GenerateMoves(board).Count} legal moves found");
-
 		foreach (Move move in moveGenerator.GenerateMoves(board)) {
 			if (move.GetStartSquareIndex() == startSquare.GetIndex() && move.GetTargetSquareIndex() == targetSquare.GetIndex()) {
 				if (move.IsPromotion()) {
@@ -131,12 +130,12 @@ public class HumanPlayer : Player {
 
 		if (moveIsLegal) {
 			Debug.Log("Move made: " +
-				$"{chosenMove.ToString(board.GetSquareContents(startSquare))}");
+				$"{chosenMove.ToString(board)}");
 			ChoseMove(chosenMove);
 			currentState = InputState.None;
 		} else {
 			Debug.Log("Illegal move. Could not make move: " +
-				$"{new Move(startSquare, targetSquare).ToString(board.GetSquareContents(startSquare))}");
+				$"{new Move(startSquare, targetSquare).ToString(board)}");
 			CancelPieceSelection();
 		}
 	}

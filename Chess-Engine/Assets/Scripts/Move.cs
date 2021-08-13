@@ -72,10 +72,16 @@ public class Move {
 		return $"From {GetStartSquareIndex()} to {GetTargetSquareIndex()}";
 	}
 
-	public string ToString(int piece) {
+	public string ToString(Board board) {
 		if (GetFlag() == (int)Flag.Castling)
 			return new Coord(GetTargetSquareIndex()).GetFile() == 2 ? "O-O-O" : "O-O";
 
-		return $"{Piece.GetPieceTypeAbbreviation(piece)}{new Coord(GetTargetSquareIndex())}";
+		Coord startSquare = new Coord(GetStartSquareIndex());
+		Coord targetSquare = new Coord(GetTargetSquareIndex());
+		if ((board.GetSquareContents(targetSquare) != 0)) {
+			string pieceType = Piece.GetPieceTypeAbbreviation(board.GetSquareContents(startSquare));
+			return $"{(pieceType == "" ? startSquare.GetFileName() : pieceType)}x{targetSquare}";
+		}
+		return $"{Piece.GetPieceTypeAbbreviation(board.GetSquareContents(new Coord(GetStartSquareIndex())))}{targetSquare}";
 	}
 }

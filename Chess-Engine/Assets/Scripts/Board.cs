@@ -200,7 +200,7 @@ public class Board {
 		// The target piece is on rank 4 or 5, while the target square is on rank 3 or 6
 		if (GetEnPassantTarget() == 0)
 			return null;
-		return new Coord(WhiteMovesNext() ? 4 : 3, GetEnPassantTarget()-1);
+		return new Coord(WhiteMovesNext() ? 4 : 3, GetEnPassantTarget() - 1);
 	}
 
 	public string GetEnPassantTargetName() {

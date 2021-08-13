@@ -36,16 +36,27 @@ public class Coord {
 		return index;
 	}
 
-	public override bool Equals(object obj) {
-		Coord otherCoord = (Coord)obj;
-		return this.file == otherCoord.GetFile() && this.rank == otherCoord.GetRank();
-	}
-
 	public override string ToString() {
 		if (file > FILE_COUNT - 1)
 			throw new System.ArgumentException("Square's file cannot be greater than the board width");
 
 		return letters[file].ToString() + (rank + 1).ToString();
+	}
+
+	public string GetFileName() {
+		return letters[file].ToString();
+	}
+
+	public override bool Equals(object obj) {
+		Coord otherCoord = (Coord)obj;
+		return this.file == otherCoord.GetFile() && this.rank == otherCoord.GetRank();
+	}
+
+	public override int GetHashCode() {
+		var hashCode = -1588814206;
+		hashCode = hashCode * -1521134295 + rank.GetHashCode();
+		hashCode = hashCode * -1521134295 + file.GetHashCode();
+		return hashCode;
 	}
 
 	public static Coord SquareNameToSquarePos(string name) {
@@ -66,12 +77,5 @@ public class Coord {
 		int file = letters.IndexOf(name[0]);
 
 		return new Coord(rank, file);
-	}
-
-	public override int GetHashCode() {
-		var hashCode = -1588814206;
-		hashCode = hashCode * -1521134295 + rank.GetHashCode();
-		hashCode = hashCode * -1521134295 + file.GetHashCode();
-		return hashCode;
 	}
 }
