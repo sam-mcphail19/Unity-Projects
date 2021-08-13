@@ -195,7 +195,7 @@ public class MoveGenerator {
 		// King side castling
 		if (castlingRights[i]) {
 			// Make sure inbetween square and result square are empty and not attacked
-			if (board.GetSquareContents(new Coord(rank, 7)) == (int)Piece.PieceType.Rook &&
+			if (Piece.GetPieceType(board.GetSquareContents(new Coord(rank, 7))) == Piece.PieceType.Rook &&
 				board.GetSquareContents(new Coord(rank, 5)) == 0 &&
 				board.GetSquareContents(new Coord(rank, 6)) == 0 &&
 				!MoveAllowsKingToBeTaken(new Move(kingIndex, kingIndex + 1)) &&
@@ -207,7 +207,7 @@ public class MoveGenerator {
 		// Queen side castling
 		if (castlingRights[i + 1]) {
 			// Make sure inbetween squares and result square are empty and not attacked
-			if (board.GetSquareContents(new Coord(rank, 0)) == (int)Piece.PieceType.Rook &&
+			if (Piece.GetPieceType(board.GetSquareContents(new Coord(rank, 0))) == Piece.PieceType.Rook &&
 				board.GetSquareContents(new Coord(rank, 1)) == 0 &&
 				board.GetSquareContents(new Coord(rank, 2)) == 0 &&
 				!MoveAllowsKingToBeTaken(new Move(kingIndex, kingIndex - 1)) &&
