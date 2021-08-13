@@ -40,21 +40,18 @@ public class MoveGenerator {
 
 		foreach (int pawnIndex in pawns) {
 			int targetIndex = this.whiteMovesNext ? pawnIndex + 8 : pawnIndex - 8;
-			// This is temporary while promotion is not implemented
-			if (targetIndex < 0 || targetIndex > 63)
-				continue;
 
 			Coord target = new Coord(targetIndex);
 			Coord pawn = new Coord(pawnIndex);
 			int targetPiece = board.GetSquareContents(target);
 
 			if (targetPiece == 0) {
-				AddPawnMove(new Move(pawn, target));
+				AddPawnMoveIfLegal(new Move(pawn, target));
 
 				if ((this.whiteMovesNext && pawn.GetRank() == 1) || (!this.whiteMovesNext && pawn.GetRank() == 6)) {
 					target = new Coord(this.whiteMovesNext ? pawnIndex + 16 : pawnIndex - 16);
 					if (board.GetSquareContents(target) == 0)
-						AddPawnMove(new Move(pawn, target, Move.Flag.PawnTwoForward));
+						AddPawnMoveIfLegal(new Move(pawn, target, Move.Flag.PawnTwoForward));
 				}
 			}
 
@@ -63,7 +60,7 @@ public class MoveGenerator {
 
 			if (Math.Abs(pawn.GetFile() - target.GetFile()) == 1 &&
 				targetPiece != 0 && Piece.IsWhite(targetPiece) != board.WhiteMovesNext()) {
-				AddPawnMove(new Move(pawn, target));
+				AddPawnMoveIfLegal(new Move(pawn, target));
 			}
 
 			target = new Coord(this.whiteMovesNext ? pawnIndex + 9 : pawnIndex - 9);
@@ -71,9 +68,15 @@ public class MoveGenerator {
 
 			if (Math.Abs(pawn.GetFile() - target.GetFile()) == 1 &&
 				targetPiece != 0 && Piece.IsWhite(targetPiece) != board.WhiteMovesNext()) {
-				AddPawnMove(new Move(pawn, target));
+				AddPawnMoveIfLegal(new Move(pawn, target));
 			}
 
+			if (board.GetEnPassantTarget() != 0 && pawn.GetRank() == (whiteMovesNext ? 4 : 3)) {
+				Coord enPassantTarget = new Coord(whiteMovesNext ? 5 : 2, board.GetEnPassantTarget() - 1);
+
+				if (pawn.GetFile() - 1 == enPassantTarget.GetFile() || pawn.GetFile() + 1 == enPassantTarget.GetFile())
+					AddPawnMoveIfLegal(new Move(pawn, enPassantTarget, Move.Flag.EnPassantCapture));
+			}
 		}
 	}
 
@@ -98,11 +101,10 @@ public class MoveGenerator {
 
 	private void GenerateKingMoves() {
 		List<int> kings = board.GetPieceTypes(this.whiteMovesNext, Piece.PieceType.King);
-		if (kings.Count < 1) {
-			string movingSide = whiteMovesNext ? "White" : "Black";
-			//Debug.LogError($"No Kings on the board for {movingSide}");
+
+		// This is temporary while checkmate is not implemented
+		if (kings.Count < 1)
 			return;
-		}
 
 		int kingIndex = kings[0];
 
@@ -255,7 +257,7 @@ public class MoveGenerator {
 		}
 	}
 
-	private void AddPawnMove(Move move) {
+	private void AddPawnMoveIfLegal(Move move) {
 		if (MoveAllowsKingToBeTaken(move))
 			return;
 

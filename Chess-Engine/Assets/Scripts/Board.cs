@@ -11,21 +11,21 @@ public class Board {
 	// Bit 0 - current turn, 1 for white's turn, 0 for black
 	// Bits 1-4 - castling availability,
 	// white can kingside, white can queenside, black can kingside, black can queenside
-	// Bits 5-7 - file of available en passant target square (square behind pawn that just moved 2 spaces)
+	// Bits 5-8 - file of available en passant target square
 	// (starting at 1, 0 means no en passant)
 	// (en passant is always on the 3rd or 6th rank depending on which player just moved
-	// Bits 8-10 - what piece type was just taken
-	// Bits 11-16 - half move counter for 50-move rule
+	// Bits 9-11 - what piece type was just taken
+	// Bits 12-17 - half move counter for 50-move rule
 	// Remaining bits - move count (starts at 1, increments after black move)
 	public int GameState;
 	Stack<int> gameStateHistory;
 
 	private const int turnMask = 1;
 	private const int castlingMask = 30;
-	private const int enFileMask = 224;
-	private const int pieceTypeMask = 1792;
-	private const int fiftyMoveCounterMask = 129024;
-	private const int moveCountMask = ~131071;
+	private const int enFileMask = 480;
+	private const int pieceTypeMask = 3584;
+	private const int fiftyMoveCounterMask = 520192;
+	private const int moveCountMask = ~262143;
 
 	public Board() {
 		this.GameState = 0;
@@ -97,6 +97,9 @@ public class Board {
 
 			PlacePieceOnSquare(GetSquareContents(rookSquare), rookTargetSquare);
 			PlacePieceOnSquare(0, rookSquare);
+		} else if (move.GetFlag() == (int)Move.Flag.PawnTwoForward) {
+			SetEnPassantTarget(targetSquare.GetFile() + 1);
+			PlacePieceOnSquare(GetSquareContents(startSquare), targetSquare);
 		} else if (move.IsPromotion()) {
 			Piece.PieceType promotedPieceType = Piece.PieceType.None;
 			int flag = move.GetFlag();
@@ -112,14 +115,20 @@ public class Board {
 
 			Piece.Color color = WhiteMovesNext() ? Piece.Color.White : Piece.Color.Black;
 			PlacePieceOnSquare(Piece.NewPiece(promotedPieceType, color), targetSquare);
+		} else if (move.GetFlag() == (int)Move.Flag.EnPassantCapture) {
+			PlacePieceOnSquare(0, GetEnPassantTargetCoord());
+			PlacePieceOnSquare(GetSquareContents(startSquare), targetSquare);
 		} else {
 			PlacePieceOnSquare(GetSquareContents(startSquare), targetSquare);
 		}
 
-
 		PlacePieceOnSquare(0, startSquare);
 
+		if (move.GetFlag() != (int)Move.Flag.PawnTwoForward)
+			SetEnPassantTarget(0);
+
 		SetWhiteMovesNext(!WhiteMovesNext());
+
 		SetFiftyMoveRuleCounter(GetFiftyMoveRuleCounter() + 1);
 		if (WhiteMovesNext())
 			SetMoveCounter(GetMoveCounter() + 1);
@@ -187,39 +196,45 @@ public class Board {
 		return (GameState & enFileMask) >> 5;
 	}
 
+	public Coord GetEnPassantTargetCoord() {
+		// The target piece is on rank 4 or 5, while the target square is on rank 3 or 6
+		if (GetEnPassantTarget() == 0)
+			return null;
+		return new Coord(WhiteMovesNext() ? 4 : 3, GetEnPassantTarget()-1);
+	}
+
 	public string GetEnPassantTargetName() {
-		Coord coord = new Coord(WhiteMovesNext() ? 6 : 3, GetEnPassantTarget());
-		return coord.GetIndex() == 0 ? "-" : coord.ToString();
+		return GetEnPassantTarget() == 0 ? "-" : new Coord(WhiteMovesNext() ? 5 : 2, GetEnPassantTarget() + 1).ToString();
 	}
 
 	public void SetTakenPieceType(int pieceType) {
 		this.GameState &= ~pieceTypeMask;
 
-		this.GameState |= pieceType << 5;
+		this.GameState |= pieceType << 9;
 	}
 
 	public int GetTakenPieceType() {
-		return (GameState & pieceTypeMask) >> 8;
+		return (GameState & pieceTypeMask) >> 9;
 	}
 
 	public void SetFiftyMoveRuleCounter(int count) {
 		this.GameState &= ~fiftyMoveCounterMask;
 
-		this.GameState |= count << 11;
+		this.GameState |= count << 12;
 	}
 
 	public int GetFiftyMoveRuleCounter() {
-		return (GameState & fiftyMoveCounterMask) >> 11;
+		return (GameState & fiftyMoveCounterMask) >> 12;
 	}
 
 	public int GetMoveCounter() {
-		return (GameState & moveCountMask) >> 17;
+		return (GameState & moveCountMask) >> 18;
 	}
 
 	public void SetMoveCounter(int count) {
 		this.GameState &= ~moveCountMask;
 
-		this.GameState |= count << 17;
+		this.GameState |= count << 18;
 	}
 
 	// Iterate over board and return all instances of the given PieceType of the given color
