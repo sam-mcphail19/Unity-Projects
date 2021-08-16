@@ -9,11 +9,11 @@ public class MoveGenerator {
 	private static readonly int[] DIAGONAL_MOVES = { 9, -7, -9, 7 };
 	private static readonly int[] KING_MOVES = { 1, -7, -8, -9, -1, 7, 8, 9 };
 
-	List<Move> moves;
+	public List<Move> moves;
 	Board board;
 
-	bool whiteMovesNext;
 	bool checkNextDepth;
+	bool whiteMovesNext;
 
 	public List<Move> GenerateMoves(Board board, bool checkNextDepth = true) {
 		this.board = board;
@@ -174,6 +174,9 @@ public class MoveGenerator {
 	}
 
 	private void GenerateCastlingMoves(int kingIndex) {
+		if (IsCheck())
+			return;
+
 		bool[] castlingRights = board.GetAllCastlingAvailibility();
 
 		int i = whiteMovesNext ? 0 : 2;
@@ -216,7 +219,7 @@ public class MoveGenerator {
 
 		int king = kings[0];
 
-		Board testBoard = board.Clone();
+		Board testBoard = board.Clone(true);
 
 		testBoard.MakeMove(move);
 		MoveGenerator moveGenerator = new MoveGenerator();
@@ -271,11 +274,43 @@ public class MoveGenerator {
 				AddPawnMoveIfLegal(new Move(pawn, target));
 		}
 	}
+	public bool IsCheck() {
+		if (!checkNextDepth)
+			return false;
 
-	private void LogMoves() {
+		Board testBoard = board.Clone(true);
+
+		testBoard.SetWhiteMovesNext(!board.WhiteMovesNext());
+
+		int king = board.GetPieceTypes(this.whiteMovesNext, Piece.PieceType.King)[0];
+		foreach (Move move in new MoveGenerator().GenerateMoves(testBoard, false)) {
+			if (move.GetTargetSquareIndex() == king)
+				return true;
+		}
+
+		return false;
+	}
+
+	//TODO Add 3 fold reptition and insufficient material
+	// Insufficient material positions:
+	//	-king against king
+	//	-king against king and bishop
+	//	-king against king and knight
+	//	-king and bishop against king and bishop, with both bishops on squares of the same color
+	public bool IsDraw() {
+		return board.GetFiftyMoveRuleCounter() >= 50 || // FIfty Move Rile
+			(moves.Count == 0 && !IsCheck()) // Stalemate
+			;
+	}
+
+	public bool IsCheckmate() {
+		return moves.Count == 0 && IsCheck();
+	}
+
+	public void LogMoves() {
 		string movesString = "Generated Moves: ";
 		foreach (Move move in moves) {
-			movesString += $"{move.ToString(board)}, ";
+			movesString += $"{board.MoveToString(move)}, ";
 		}
 		Debug.Log(movesString.Trim(' ').Trim(','));
 	}

@@ -20,6 +20,10 @@ public class Board {
 	public int GameState;
 	Stack<int> gameStateHistory;
 
+	MoveGenerator moveGenerator;
+
+	private bool isTestBoard = false;
+
 	private const int turnMask = 1;
 	private const int castlingMask = 30;
 	private const int enFileMask = 480;
@@ -31,17 +35,20 @@ public class Board {
 		this.GameState = 0;
 		this.gameStateHistory = new Stack<int>();
 		this.representation = new int[RANK_COUNT, FILE_COUNT];
+		this.moveGenerator = new MoveGenerator();
+		this.moveGenerator.GenerateMoves(this);
 
 		for (int file = 0; file < FILE_COUNT; file++)
 			for (int rank = 0; rank < RANK_COUNT; rank++)
 				PlacePieceOnSquare(0, new Coord(rank, file));
 	}
 
-	public Board Clone() {
+	public Board Clone(bool isTestBoard = false) {
 		Board board = new Board();
-		board.representation = (int[,])this.representation.Clone();
 		board.GameState = this.GameState;
 		board.gameStateHistory = new Stack<int>(new Stack<int>(this.gameStateHistory));
+		board.representation = (int[,])this.representation.Clone();
+		board.isTestBoard = isTestBoard;
 
 		return board;
 	}
@@ -129,13 +136,17 @@ public class Board {
 
 		SetWhiteMovesNext(!WhiteMovesNext());
 
-		SetFiftyMoveRuleCounter(GetFiftyMoveRuleCounter() + 1);
-		if (WhiteMovesNext())
-			SetMoveCounter(GetMoveCounter() + 1);
+		if (!this.isTestBoard) {
+			SetFiftyMoveRuleCounter(GetFiftyMoveRuleCounter() + 1);
+			if (WhiteMovesNext())
+				SetMoveCounter(GetMoveCounter() + 1);
+
+			moveGenerator.GenerateMoves(this);
+		}
 	}
 
 	public void UnmakeMove(Move move) {
-		int previousState = gameStateHistory.Pop();
+		int previousState = this.gameStateHistory.Pop();
 
 		Coord startSquare = new Coord(move.GetStartSquareIndex());
 		Coord targetSquare = new Coord(move.GetTargetSquareIndex());
@@ -147,7 +158,7 @@ public class Board {
 	}
 
 	public int GetSquareContents(Coord coord) {
-		return representation[coord.GetRank(), coord.GetFile()];
+		return this.representation[coord.GetRank(), coord.GetFile()];
 	}
 
 	public void PlacePieceOnSquare(int piece, Coord coord) {
@@ -155,14 +166,14 @@ public class Board {
 	}
 
 	public bool WhiteMovesNext() {
-		return (GameState & 0b1) != 0;
+		return (this.GameState & 0b1) != 0;
 	}
 
 	public void SetWhiteMovesNext(bool whitesTurn) {
 		this.GameState &= ~turnMask;
 
 		if (whitesTurn)
-			GameState |= turnMask;
+			this.GameState |= turnMask;
 	}
 
 	public void SetCastlingAvailability(CastlingDirection direction, bool availability) {
@@ -182,7 +193,7 @@ public class Board {
 	//third bit: mod 8 > 3
 	//fourth bit: mod 16 > 7
 	public bool[] GetAllCastlingAvailibility() {
-		int availibility = (GameState & castlingMask) >> 1;
+		int availibility = (this.GameState & castlingMask) >> 1;
 		return new bool[] { availibility % 2 > 0, availibility % 4 > 1, availibility % 8 > 3, availibility % 16 > 7 };
 	}
 
@@ -193,7 +204,7 @@ public class Board {
 	}
 
 	public int GetEnPassantTarget() {
-		return (GameState & enFileMask) >> 5;
+		return (this.GameState & enFileMask) >> 5;
 	}
 
 	public Coord GetEnPassantTargetCoord() {
@@ -204,7 +215,7 @@ public class Board {
 	}
 
 	public string GetEnPassantTargetName() {
-		return GetEnPassantTarget() == 0 ? "-" : new Coord(WhiteMovesNext() ? 5 : 2, GetEnPassantTarget() + 1).ToString();
+		return GetEnPassantTarget() == 0 ? "-" : new Coord(WhiteMovesNext() ? 5 : 2, GetEnPassantTarget() - 1).ToString();
 	}
 
 	public void SetTakenPieceType(int pieceType) {
@@ -214,7 +225,7 @@ public class Board {
 	}
 
 	public int GetTakenPieceType() {
-		return (GameState & pieceTypeMask) >> 9;
+		return (this.GameState & pieceTypeMask) >> 9;
 	}
 
 	public void SetFiftyMoveRuleCounter(int count) {
@@ -224,11 +235,11 @@ public class Board {
 	}
 
 	public int GetFiftyMoveRuleCounter() {
-		return (GameState & fiftyMoveCounterMask) >> 12;
+		return (this.GameState & fiftyMoveCounterMask) >> 12;
 	}
 
 	public int GetMoveCounter() {
-		return (GameState & moveCountMask) >> 18;
+		return (this.GameState & moveCountMask) >> 18;
 	}
 
 	public void SetMoveCounter(int count) {
@@ -249,6 +260,44 @@ public class Board {
 					toReturn.Add(coord.GetIndex());
 			}
 		return toReturn;
+	}
+
+	public string MoveToString(Move move) {
+		if (move.GetFlag() == (int)Move.Flag.Castling)
+			return new Coord(move.GetTargetSquareIndex()).GetFile() == 2 ? "O-O-O" : "O-O";
+		Coord startSquare = new Coord(move.GetStartSquareIndex());
+		Coord targetSquare = new Coord(move.GetTargetSquareIndex());
+
+		string toReturn;
+		if ((this.GetSquareContents(targetSquare) != 0)) {
+			string pieceType = Piece.GetPieceTypeAbbreviation(this.GetSquareContents(startSquare));
+			toReturn = $"{(pieceType == "" ? startSquare.GetFileName() : pieceType)}x{targetSquare}";
+		} else
+			toReturn = $"{Piece.GetPieceTypeAbbreviation(this.GetSquareContents(new Coord(move.GetStartSquareIndex())))}{targetSquare}";
+
+		Board testBoard = this.Clone(true);
+		testBoard.MakeMove(move);
+		testBoard.moveGenerator.GenerateMoves(testBoard);
+
+		if (testBoard.IsCheckmate())
+			return toReturn + "#";
+
+		if (testBoard.IsCheck())
+			return toReturn + "+";
+
+		return toReturn;
+	}
+
+	public bool IsCheck() {
+		return moveGenerator.IsCheck();
+	}
+
+	public bool IsCheckmate() {
+		return moveGenerator.IsCheckmate();
+	}
+
+	public bool IsDraw() {
+		return moveGenerator.IsDraw();
 	}
 
 	public static bool IsIndexInBounds(int index) {

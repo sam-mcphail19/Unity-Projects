@@ -130,12 +130,12 @@ public class HumanPlayer : Player {
 
 		if (moveIsLegal) {
 			Debug.Log("Move made: " +
-				$"{chosenMove.ToString(board)}");
+				$"{board.MoveToString(chosenMove)}");
 			ChoseMove(chosenMove);
 			currentState = InputState.None;
 		} else {
 			Debug.Log("Illegal move. Could not make move: " +
-				$"{new Move(startSquare, targetSquare).ToString(board)}");
+				$"{board.MoveToString(new Move(startSquare, targetSquare))}");
 			CancelPieceSelection();
 		}
 	}
