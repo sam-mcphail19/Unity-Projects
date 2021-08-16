@@ -59,7 +59,7 @@ public class MoveGenerator {
 			AddPawnAttackingMoveIfLegal(pawn, new Coord(this.whiteMovesNext ? pawnIndex + 9 : pawnIndex - 9));
 
 			if (board.GetEnPassantTarget() != 0 && pawn.GetRank() == (whiteMovesNext ? 4 : 3)) {
-				Coord enPassantTarget = new Coord(whiteMovesNext ? 5 : 2, board.GetEnPassantTarget() - 1);
+				Coord enPassantTarget = new Coord(whiteMovesNext ? 5 : 2, board.GetEnPassantTarget() + 1);
 
 				if (pawn.GetFile() - 1 == enPassantTarget.GetFile() || pawn.GetFile() + 1 == enPassantTarget.GetFile())
 					AddPawnMoveIfLegal(new Move(pawn, enPassantTarget, Move.Flag.EnPassantCapture));
@@ -200,6 +200,7 @@ public class MoveGenerator {
 			if (Piece.GetPieceType(board.GetSquareContents(new Coord(rank, 0))) == Piece.PieceType.Rook &&
 				board.GetSquareContents(new Coord(rank, 1)) == 0 &&
 				board.GetSquareContents(new Coord(rank, 2)) == 0 &&
+				board.GetSquareContents(new Coord(rank, 3)) == 0 &&
 				!MoveAllowsKingToBeTaken(new Move(kingIndex, kingIndex - 1)) &&
 				!MoveAllowsKingToBeTaken(new Move(kingIndex, kingIndex - 2))) {
 				moves.Add(new Move(kingIndex, kingIndex - 2, Move.Flag.Castling));

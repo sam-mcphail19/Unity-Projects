@@ -61,7 +61,7 @@ public static class FenUtil {
 			if (sections[3].Equals("-"))
 				board.SetEnPassantTarget(0);
 			else
-				board.SetEnPassantTarget(Coord.SquareNameToSquarePos(sections[3]).GetFile());
+				board.SetEnPassantTarget(Coord.SquareNameToSquarePos(sections[3]).GetFile() - 1);
 		}
 
 		if (sections.Length > 4)
