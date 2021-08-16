@@ -137,7 +137,7 @@ public class MoveGenerator {
 
 	private void GenerateDiagonalMovesForPiece(int pieceIndex) {
 		foreach (int direction in DIAGONAL_MOVES) {
-			for (int i = pieceIndex + direction; i < 63 && i > 0; i += direction) {
+			for (int i = pieceIndex + direction; i <= 63 && i > 0; i += direction) {
 				Coord target = new Coord(i);
 
 				if (BoardUI.IsSquareLight(target) != BoardUI.IsSquareLight(new Coord(pieceIndex)))
@@ -155,7 +155,7 @@ public class MoveGenerator {
 
 	private void GenerateStraightMovesForPiece(int pieceIndex) {
 		foreach (int direction in STRAIGHT_MOVES) {
-			for (int i = pieceIndex + direction; i < 63 && i > 0; i += direction) {
+			for (int i = pieceIndex + direction; i <= 63 && i > 0; i += direction) {
 				Coord target = new Coord(i);
 
 				if (Math.Abs(direction) == 1 && target.GetRank() != new Coord(pieceIndex).GetRank())
