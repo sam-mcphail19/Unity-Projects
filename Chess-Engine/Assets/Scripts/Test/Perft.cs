@@ -26,32 +26,36 @@ public class Perft : MonoBehaviour {
 	}
 
 	public void RunSuite() {
-		StartCoroutine(RunTests());
+		RunTests();
 	}
 
-	public IEnumerator RunTests() {
+	public void RunTests() {
 		Test[] tests = GetSuiteTests(perftTestSuite);
 		Debug.Log($"Test Suite Loaded. {tests.Length} tests loaded");
-		foreach (Test test in tests) {
-			yield return new WaitForEndOfFrame();
-			RunTest(test);
-		}
+		int failedTests = 0;
+		foreach (Test test in tests)
+			if (!RunTest(test))
+				failedTests++;
+
+		Debug.Log($"Test Suite Completed. {tests.Length} tests ran. " +
+			$"{failedTests} tests failed. " +
+			$"{(((float)failedTests)/tests.Length * 100).ToString("F2")}% of tests failed.");
 	}
 
-	public void RunTest(Test test) {
+	public bool RunTest(Test test) {
 		board = FenUtil.LoadPositionFromFenString(test.fen);
 
-		for (int i = 1; i < test.depth; i++) {
-			int nodesFound = Search(i);
-			if(nodesFound == test.expectedNodeCounts[i-1])
-				Debug.Log($"At depth: {i}\n" +
-					$"Nodes Found: {nodesFound}, Nodes Expected: {test.expectedNodeCounts[i-1]}. " +
-					$"Test Succeeded for depth {i}");
-			else
-				Debug.Log($"At depth: {i}\n" +
-					$"Nodes Found: {nodesFound}, Nodes Expected: {test.expectedNodeCounts[i-1]}. " +
-					$"Test Failed for depth {i}");
+		for (int i = 0; i < test.depth; i++) {
+			int nodesFound = Search(i+1);
+			if (nodesFound != test.expectedNodeCounts[i]) {
+				Debug.Log($"At depth: {i+1}\n" +
+					$"Nodes Found: {nodesFound}, Nodes Expected: {test.expectedNodeCounts[i]}. " +
+					$"Test Failed for position: {FenUtil.CurrentBoardPositionToFenString(board)}");
+				return false;
+			}
 		}
+
+		return true;
 	}
 
 	int Search(int depth) {
@@ -65,8 +69,7 @@ public class Perft : MonoBehaviour {
 
 		for (int i = 0; i < moves.Count; i++) {
 			board.MakeMove(moves[i]);
-			int numNodesFromThisPosition = Search(depth - 1);
-			numLocalNodes += numNodesFromThisPosition;
+			numLocalNodes += Search(depth - 1);
 			board.UnmakeMove(moves[i]);
 		}
 		return numLocalNodes;
@@ -75,26 +78,26 @@ public class Perft : MonoBehaviour {
 	public Test[] GetSuiteTests(TextAsset suiteFile) {
 		var testList = new List<Test>();
 
-		string suiteText = suiteFile.text.Split('{')[1].Split('}')[0];
-		string[] testStrings = suiteText.Split('\n');
+		string[] testStrings = suiteFile.text.Split('\n');
 
-		for (int i = 0; i < testStrings.Length; i++) {
-			string testString = testStrings[i].Trim();
-			string[] sections = testString.Split('_');
-			if (sections.Length == 3) {
-				int depth = int.Parse(sections[0]);
-				string[] nodeCountSection = sections[1].Trim('[').Trim(']').Split(',');
-				int[] expectedNodeCounts = new int[depth];
-				for (int j = 0; j < depth; j++)
-					expectedNodeCounts[j] = int.Parse(nodeCountSection[j]);
+		for (int i = 0; i < testStrings.Length - 1; i++) {
+			string[] sections = testStrings[i].Split(',');
 
-				var test = new Test() {
-					depth = depth,
-					expectedNodeCounts = expectedNodeCounts,
-					fen = sections[2]
-				};
-				testList.Add(test);
+			// Only go to depth 1 for the full suite
+			// Allows us to see exactly what positions we are failing for
+			int depth = suiteFile.name.Contains("TestSuiteFull") ? 1 : sections.Length - 1;
+			int[] expectedNodeCounts = new int[depth];
+
+			for (int j = 0; j < depth; j++) {
+				expectedNodeCounts[j] = int.Parse(sections[j + 1]);
 			}
+
+			Test test = new Test() {
+				depth = depth,
+				expectedNodeCounts = expectedNodeCounts,
+				fen = sections[0]
+			};
+			testList.Add(test);
 		}
 		return testList.ToArray();
 	}
