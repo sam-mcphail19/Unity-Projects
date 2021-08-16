@@ -60,7 +60,7 @@ public static class FenUtil {
 		if (sections.Length > 3) {
 			if (sections[3].Equals("-"))
 				board.SetEnPassantTarget(0);
-			else 
+			else
 				board.SetEnPassantTarget(Coord.SquareNameToSquarePos(sections[3]).GetFile());
 		}
 
@@ -78,6 +78,77 @@ public static class FenUtil {
 			$"FiftyMoveRuleCount: {board.GetFiftyMoveRuleCounter()}\n" +
 			$"MoveCount: {board.GetMoveCounter()}");
 		return board;
+	}
+
+	public static string CurrentBoardPositionToFenString(Board board) {
+		string fen = "";
+
+		for (int rank = 7; rank >= 0; rank--) {
+			int emptySpaces = 0;
+			for (int file = 0; file < 8; file++) {
+				Coord currentSquare = new Coord(rank, file);
+				int piece = board.GetSquareContents(currentSquare);
+				if (piece == 0) {
+					emptySpaces++;
+					continue;
+				}
+
+				if (emptySpaces > 0) {
+					fen += emptySpaces;
+					emptySpaces = 0;
+				}
+
+				char pieceChar = ' ';
+				switch (Piece.GetPieceType(piece)) {
+					case Piece.PieceType.Pawn:
+						pieceChar = 'p';
+						break;
+
+					case Piece.PieceType.Knight:
+						pieceChar = 'n';
+						break;
+
+					case Piece.PieceType.King:
+						pieceChar = 'k';
+						break;
+
+					case Piece.PieceType.Bishop:
+						pieceChar = 'b';
+						break;
+
+					case Piece.PieceType.Rook:
+						pieceChar = 'r';
+						break;
+
+					case Piece.PieceType.Queen:
+						pieceChar = 'q';
+						break;
+				}
+				fen += Piece.IsWhite(piece) ? Char.ToUpper(pieceChar) : pieceChar;
+			}
+
+			if (emptySpaces > 0)
+				fen += emptySpaces;
+
+			if (rank != 0)
+				fen += "/";
+		}
+
+		fen += " " + (board.WhiteMovesNext() ? "w" : "b") + " ";
+
+		bool[] castlingRights = board.GetAllCastlingAvailibility();
+		fen += castlingRights[0] ? "W" : "";
+		fen += castlingRights[1] ? "Q" : "";
+		fen += castlingRights[2] ? "w" : "";
+		fen += castlingRights[3] ? "q" : "";
+
+		fen += " " + board.GetEnPassantTargetName();
+
+		fen += " " + board.GetFiftyMoveRuleCounter();
+
+		fen += " " + board.GetMoveCounter();
+
+		return fen;
 	}
 
 	public static Board LoadInitialPosition() {
