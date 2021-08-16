@@ -18,7 +18,9 @@ public class Board {
 	// Bits 12-17 - half move counter for 50-move rule
 	// Remaining bits - move count (starts at 1, increments after black move)
 	public int GameState;
-	Stack<int> gameStateHistory;
+	public Stack<string> gameStateHistory;
+
+	public bool unmadeMove = false;
 
 	MoveGenerator moveGenerator;
 
@@ -33,7 +35,7 @@ public class Board {
 
 	public Board() {
 		this.GameState = 0;
-		this.gameStateHistory = new Stack<int>();
+		this.gameStateHistory = new Stack<string>();
 		this.representation = new int[RANK_COUNT, FILE_COUNT];
 		this.moveGenerator = new MoveGenerator();
 		this.moveGenerator.GenerateMoves(this);
@@ -46,7 +48,7 @@ public class Board {
 	public Board Clone(bool isTestBoard = false) {
 		Board board = new Board();
 		board.GameState = this.GameState;
-		board.gameStateHistory = new Stack<int>(new Stack<int>(this.gameStateHistory));
+		board.gameStateHistory = new Stack<string>(new Stack<string>(this.gameStateHistory));
 		board.representation = (int[,])this.representation.Clone();
 		board.isTestBoard = isTestBoard;
 
@@ -54,7 +56,7 @@ public class Board {
 	}
 
 	public void MakeMove(Move move) {
-		this.gameStateHistory.Push(GameState);
+		this.gameStateHistory.Push(FenUtil.CurrentBoardPositionToFenString(this));
 
 		Coord startSquare = new Coord(move.GetStartSquareIndex());
 		Coord targetSquare = new Coord(move.GetTargetSquareIndex());
@@ -145,16 +147,12 @@ public class Board {
 		}
 	}
 
-	public void UnmakeMove(Move move) {
-		int previousState = this.gameStateHistory.Pop();
+	public void UnmakeMove() {
+		Board previousPosition = FenUtil.LoadPositionFromFenString(this.gameStateHistory.Pop());
+		this.GameState = previousPosition.GameState;
+		this.representation = previousPosition.representation;
 
-		Coord startSquare = new Coord(move.GetStartSquareIndex());
-		Coord targetSquare = new Coord(move.GetTargetSquareIndex());
-
-		PlacePieceOnSquare(GetSquareContents(targetSquare), startSquare);
-		PlacePieceOnSquare(GetTakenPieceType(), targetSquare);
-
-		this.GameState = previousState;
+		this.unmadeMove = true;
 	}
 
 	public int GetSquareContents(Coord coord) {

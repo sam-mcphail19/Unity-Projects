@@ -6,8 +6,7 @@ using UnityEngine;
 public static class FenUtil {
 
 	//private const string INITIAL_POS = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-	//private const string INITIAL_POS = "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8"; // For testing promotion
-	private const string INITIAL_POS = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -"; // For testing castling
+	private const string INITIAL_POS = "8/4k1B1/1p2p2r/1N3b2/pP3P1P/3R4/5QB1/1N4KR b  - 0 0";
 
 	private static Dictionary<char, int> symbolToPieceType = new Dictionary<char, int>() {
 		{'p', Piece.PAWN},
@@ -70,13 +69,6 @@ public static class FenUtil {
 		if (sections.Length > 5)
 			board.SetMoveCounter(int.Parse(sections[5]));
 
-		Debug.Log($"FEN string\"{fen}\" loaded.\n" +
-			$"GameState:\n" +
-			$"WhiteMovesNext: {board.WhiteMovesNext()}\n" +
-			$"CastlingAvailability: {board.GetAllCastlingAvailibility()}\n" +
-			$"EnPassantTarget: {board.GetEnPassantTargetName()}\n" +
-			$"FiftyMoveRuleCount: {board.GetFiftyMoveRuleCounter()}\n" +
-			$"MoveCount: {board.GetMoveCounter()}");
 		return board;
 	}
 

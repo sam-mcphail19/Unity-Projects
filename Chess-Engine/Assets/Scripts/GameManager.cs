@@ -22,6 +22,10 @@ public class GameManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update() {
 		playerToMove.Update();
+		if (board.unmadeMove) {
+			boardUi.UpdatePosition(board);
+			board.unmadeMove = false;
+		}
 	}
 
 	void NewGame() {

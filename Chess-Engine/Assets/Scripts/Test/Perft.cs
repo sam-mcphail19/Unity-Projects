@@ -59,7 +59,7 @@ public class Perft : MonoBehaviour {
 	}
 
 	int Search(int depth) {
-		var moves = moveGenerator.GenerateMoves(board);
+		List<Move> moves = moveGenerator.GenerateMoves(board);
 
 		if (depth == 1) {
 			return moves.Count;
@@ -70,7 +70,7 @@ public class Perft : MonoBehaviour {
 		for (int i = 0; i < moves.Count; i++) {
 			board.MakeMove(moves[i]);
 			numLocalNodes += Search(depth - 1);
-			board.UnmakeMove(moves[i]);
+			board.UnmakeMove();
 		}
 		return numLocalNodes;
 	}

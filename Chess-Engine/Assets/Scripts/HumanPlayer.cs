@@ -43,6 +43,10 @@ public class HumanPlayer : Player {
 		if (Input.GetMouseButtonDown(1)) {
 			CancelPieceSelection();
 		}
+
+		if (Input.GetKeyDown(KeyCode.B)) {
+			board.UnmakeMove();
+		}
 	}
 
 	void HandlePointAndClickMovement(Vector2 mousePos) {
