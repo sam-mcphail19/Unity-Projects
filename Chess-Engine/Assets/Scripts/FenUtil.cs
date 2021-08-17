@@ -6,7 +6,7 @@ using UnityEngine;
 public static class FenUtil {
 
 	//private const string INITIAL_POS = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-	private const string INITIAL_POS = "8/4k1B1/1p2p2r/1N3b2/pP3P1P/3R4/5QB1/1N4KR b  - 0 0";
+	private const string INITIAL_POS = "8/4k1B1/1p2p2r/1N3b2/pP3P1P/3R4/5QB1/1N4KR b  b3 0 0";
 
 	private static Dictionary<char, int> symbolToPieceType = new Dictionary<char, int>() {
 		{'p', Piece.PAWN},
@@ -57,10 +57,8 @@ public static class FenUtil {
 			sections[2].Contains("q"));
 
 		if (sections.Length > 3) {
-			if (sections[3].Equals("-"))
-				board.SetEnPassantTarget(0);
-			else
-				board.SetEnPassantTarget(Coord.SquareNameToSquarePos(sections[3]).GetFile() - 1);
+			if (!sections[3].Equals("-"))
+				board.SetEnPassantTarget(Coord.SquareNameToSquarePos(sections[3]).GetFile() + 1);
 		}
 
 		if (sections.Length > 4)
@@ -129,9 +127,9 @@ public static class FenUtil {
 		fen += " " + (board.WhiteMovesNext() ? "w" : "b") + " ";
 
 		bool[] castlingRights = board.GetAllCastlingAvailibility();
-		fen += castlingRights[0] ? "W" : "";
+		fen += castlingRights[0] ? "K" : "";
 		fen += castlingRights[1] ? "Q" : "";
-		fen += castlingRights[2] ? "w" : "";
+		fen += castlingRights[2] ? "k" : "";
 		fen += castlingRights[3] ? "q" : "";
 
 		fen += " " + board.GetEnPassantTargetName();

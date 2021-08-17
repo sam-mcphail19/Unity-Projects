@@ -69,7 +69,7 @@ public class Coord {
 		if (!char.IsDigit(name[1]))
 			throw new System.ArgumentException($"{name[1]} is not a valid rank for a square name");
 
-		int rank = int.Parse(name[1].ToString());
+		int rank = int.Parse(name[1].ToString()) - 1;
 
 		if (rank < 0 || rank > 7)
 			throw new System.ArgumentException($"{name[1]} is not a valid rank for a square name");

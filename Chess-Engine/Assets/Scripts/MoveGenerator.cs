@@ -59,7 +59,7 @@ public class MoveGenerator {
 			AddPawnAttackingMoveIfLegal(pawn, new Coord(this.whiteMovesNext ? pawnIndex + 9 : pawnIndex - 9));
 
 			if (board.GetEnPassantTarget() != 0 && pawn.GetRank() == (whiteMovesNext ? 4 : 3)) {
-				Coord enPassantTarget = new Coord(whiteMovesNext ? 5 : 2, board.GetEnPassantTarget() + 1);
+				Coord enPassantTarget = new Coord(whiteMovesNext ? 5 : 2, board.GetEnPassantTarget() - 1);
 
 				if (pawn.GetFile() - 1 == enPassantTarget.GetFile() || pawn.GetFile() + 1 == enPassantTarget.GetFile())
 					AddPawnMoveIfLegal(new Move(pawn, enPassantTarget, Move.Flag.EnPassantCapture));

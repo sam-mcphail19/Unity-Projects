@@ -93,6 +93,9 @@ public class BoardUI : MonoBehaviour {
 	}
 
 	public void HighlightLastMoveMade() {
+		if (lastMoveMade == null)
+			return;
+
 		Coord start = new Coord(this.lastMoveMade.GetStartSquareIndex());
 		Coord target = new Coord(this.lastMoveMade.GetTargetSquareIndex());
 		SetSquareColor(start, IsSquareLight(start) ? lightColorLastMove : darkColorLastMove);
