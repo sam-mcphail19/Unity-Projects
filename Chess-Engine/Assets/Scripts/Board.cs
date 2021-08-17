@@ -17,8 +17,8 @@ public class Board {
 	// Bits 9-11 - what piece type was just taken
 	// Bits 12-17 - half move counter for 50-move rule
 	// Remaining bits - move count (starts at 1, increments after black move)
-	public int GameState;
-	public Stack<string> gameStateHistory;
+	private int GameState;
+	private Stack<PositionState> gameStateHistory;
 
 	public bool unmadeMove = false;
 
@@ -35,7 +35,7 @@ public class Board {
 
 	public Board() {
 		this.GameState = 0;
-		this.gameStateHistory = new Stack<string>();
+		this.gameStateHistory = new Stack<PositionState>();
 		this.representation = new int[RANK_COUNT, FILE_COUNT];
 		this.moveGenerator = new MoveGenerator();
 		this.moveGenerator.GenerateMoves(this);
@@ -48,7 +48,7 @@ public class Board {
 	public Board Clone(bool isTestBoard = false) {
 		Board board = new Board();
 		board.GameState = this.GameState;
-		board.gameStateHistory = new Stack<string>(new Stack<string>(this.gameStateHistory));
+		board.gameStateHistory = new Stack<PositionState>(new Stack<PositionState>(this.gameStateHistory));
 		board.representation = (int[,])this.representation.Clone();
 		board.isTestBoard = isTestBoard;
 
@@ -56,7 +56,7 @@ public class Board {
 	}
 
 	public void MakeMove(Move move) {
-		this.gameStateHistory.Push(FenUtil.CurrentBoardPositionToFenString(this));
+		this.gameStateHistory.Push(new PositionState(this.GameState, this.representation));
 
 		Coord startSquare = new Coord(move.GetStartSquareIndex());
 		Coord targetSquare = new Coord(move.GetTargetSquareIndex());
@@ -148,9 +148,9 @@ public class Board {
 	}
 
 	public void UnmakeMove() {
-		Board previousPosition = FenUtil.LoadPositionFromFenString(this.gameStateHistory.Pop());
-		this.GameState = previousPosition.GameState;
-		this.representation = previousPosition.representation;
+		PositionState position = this.gameStateHistory.Pop();
+		this.GameState = position.GameState;
+		this.representation = position.Board;
 
 		this.unmadeMove = true;
 	}
@@ -311,5 +311,16 @@ public class Board {
 		WhiteQueen = 2,
 		BlackKing = 3,
 		BlackQueen = 4
+	}
+
+	struct PositionState {
+
+		public PositionState(int gameState, int[,] board) {
+			GameState = gameState;
+			Board = board;
+		}
+
+		public int GameState { get; }
+		public int[,] Board { get; }
 	}
 }
