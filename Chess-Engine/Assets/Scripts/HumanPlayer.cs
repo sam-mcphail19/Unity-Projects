@@ -108,6 +108,7 @@ public class HumanPlayer : Player {
 			currentState = InputState.None;
 			boardUI.DeselectSquare();
 			boardUI.ResetPiecePosition(selectedPieceSquare);
+			boardUI.HighlightLastMoveMade();
 		}
 	}
 

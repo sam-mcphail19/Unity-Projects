@@ -8,6 +8,8 @@ public class BoardUI : MonoBehaviour {
 	SpriteRenderer[,] pieceRenderers;
 	Shader squareShader;
 
+	Move lastMoveMade;
+
 	private const int FILE_COUNT = 8;
 	private const int RANK_COUNT = 8;
 	private const float pieceDragDepth = -0.2f;
@@ -18,6 +20,8 @@ public class BoardUI : MonoBehaviour {
 	public Color darkColorSelected;
 	public Color lightColorLegalMove;
 	public Color darkColorLegalMove;
+	public Color lightColorLastMove;
+	public Color darkColorLastMove;
 
 	public float pieceScale = 1f;
 
@@ -30,7 +34,8 @@ public class BoardUI : MonoBehaviour {
 	public void OnMoveMade(Board board, Move move) {
 		UpdatePosition(board);
 		ResetSquareColors();
-		//HighlightMove(move); // To be implemeted - highlight the new position of the last piece moved, and its old position
+		this.lastMoveMade = move;
+		HighlightLastMoveMade();
 	}
 
 	void CreateBoard() {
@@ -85,6 +90,13 @@ public class BoardUI : MonoBehaviour {
 				SetSquareColor(target, IsSquareLight(target) ? lightColorLegalMove : darkColorLegalMove);
 			}
 		}
+	}
+
+	public void HighlightLastMoveMade() {
+		Coord start = new Coord(this.lastMoveMade.GetStartSquareIndex());
+		Coord target = new Coord(this.lastMoveMade.GetTargetSquareIndex());
+		SetSquareColor(start, IsSquareLight(start) ? lightColorLastMove : darkColorLastMove);
+		SetSquareColor(target, IsSquareLight(target) ? lightColorLastMove : darkColorLastMove);
 	}
 
 	public void DragPiece(Coord coord, Vector2 mousePos) {

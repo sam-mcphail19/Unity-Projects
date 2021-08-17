@@ -280,10 +280,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lightColor: {r: 1, g: 0.88322395, b: 0.514151, a: 0}
   darkColor: {r: 0.6698113, g: 0.47320482, b: 0.17377181, a: 0}
-  lightColorSelected: {r: 0.9357672, g: 1, b: 0.2028302, a: 0}
-  darkColorSelected: {r: 0.93725497, g: 1, b: 0.20392159, a: 0}
+  lightColorSelected: {r: 0.49123356, g: 0.5405047, b: 0.7830189, a: 0}
+  darkColorSelected: {r: 0.36102706, g: 0.39819753, b: 0.5754717, a: 0}
   lightColorLegalMove: {r: 0.46142188, g: 1, b: 0.25943398, a: 0}
   darkColorLegalMove: {r: 0.3670544, g: 0.7924528, b: 0.20558919, a: 0}
+  lightColorLastMove: {r: 0.93725497, g: 1, b: 0.20392159, a: 0}
+  darkColorLastMove: {r: 0.69803923, g: 0.74509805, b: 0.15294118, a: 0}
   pieceScale: 1
   pieceManager: {fileID: 1366340771}
 --- !u!4 &617840924
