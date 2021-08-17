@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 1166123706}
   - component: {fileID: 1166123705}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Perft
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca48d04acd1421448a79cbb2b6a5ef4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  perftTestSuite: {fileID: 4900000, guid: 0393cfa9b34a98143a82608f1877cd70, type: 3}
+  perftTestSuite: {fileID: 4900000, guid: 1bed9d6523f84cc49bc1a7cc2edb2c3c, type: 3}
 --- !u!4 &1166123706
 Transform:
   m_ObjectHideFlags: 0

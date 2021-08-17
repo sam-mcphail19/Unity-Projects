@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Threading;
 
 /*
  * https://www.chessprogramming.org/Perft
@@ -12,67 +13,30 @@ public class Perft : MonoBehaviour {
 	[Header("Suite Test")]
 	public TextAsset perftTestSuite;
 
-	MoveGenerator moveGenerator;
-	Board board;
+	void Start() { }
 
-	void Start() {
-		board = new Board();
-		moveGenerator = new MoveGenerator();
-	}
-
-	// Update is called once per frame
-	void Update() {
-
-	}
+	void Update() { }
 
 	public void RunSuite() {
-		RunTests();
-	}
-
-	public void RunTests() {
 		Test[] tests = GetSuiteTests(perftTestSuite);
 		Debug.Log($"Test Suite Loaded. {tests.Length} tests loaded");
 		int failedTests = 0;
-		foreach (Test test in tests)
-			if (!RunTest(test))
+		foreach (Test test in tests) {
+			bool testPassed = false;
+			Thread thread = new Thread(
+				 () => {
+					 testPassed = test.RunTest();
+				 }
+			);
+			thread.Start();
+			thread.Join();
+			if (!testPassed)
 				failedTests++;
+		}
 
 		Debug.Log($"Test Suite Completed. {tests.Length} tests ran. " +
-			$"{failedTests} tests failed. " +
-			$"{(((float)failedTests)/tests.Length * 100).ToString("F2")}% of tests failed.");
-	}
-
-	public bool RunTest(Test test) {
-		board = FenUtil.LoadPositionFromFenString(test.fen);
-
-		for (int i = 0; i < test.depth; i++) {
-			int nodesFound = Search(i+1);
-			if (nodesFound != test.expectedNodeCounts[i]) {
-				Debug.Log($"At depth: {i+1}\n" +
-					$"Nodes Found: {nodesFound}, Nodes Expected: {test.expectedNodeCounts[i]}. " +
-					$"Test Failed for position: {FenUtil.CurrentBoardPositionToFenString(board)}");
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	int Search(int depth) {
-		List<Move> moves = moveGenerator.GenerateMoves(board);
-
-		if (depth == 1) {
-			return moves.Count;
-		}
-
-		int numLocalNodes = 0;
-
-		for (int i = 0; i < moves.Count; i++) {
-			board.MakeMove(moves[i]);
-			numLocalNodes += Search(depth - 1);
-			board.UnmakeMove();
-		}
-		return numLocalNodes;
+					$"{failedTests} tests failed. " +
+					$"{(((float)failedTests) / tests.Length * 100).ToString("F2")}% of tests failed.");
 	}
 
 	public Test[] GetSuiteTests(TextAsset suiteFile) {
@@ -80,7 +44,7 @@ public class Perft : MonoBehaviour {
 
 		string[] testStrings = suiteFile.text.Split('\n');
 
-		for (int i = 0; i < testStrings.Length - 1; i++) {
+		for (int i = 0; i < testStrings.Length; i++) {
 			string[] sections = testStrings[i].Split(',');
 
 			// Only go to depth 1 for the full suite
@@ -92,20 +56,8 @@ public class Perft : MonoBehaviour {
 				expectedNodeCounts[j] = int.Parse(sections[j + 1]);
 			}
 
-			Test test = new Test() {
-				depth = depth,
-				expectedNodeCounts = expectedNodeCounts,
-				fen = sections[0]
-			};
-			testList.Add(test);
+			testList.Add(new Test(sections[0], depth, expectedNodeCounts));
 		}
 		return testList.ToArray();
-	}
-
-	[System.Serializable]
-	public struct Test {
-		public string fen;
-		public int depth;
-		public int[] expectedNodeCounts;
 	}
 }
