@@ -27,3 +27,7 @@ sysinfo.txt
 */UserSettings
 */Packages
 */Logs
+
+# Test Data
+*/Assets/TestData
+*/Assets/TestData.meta

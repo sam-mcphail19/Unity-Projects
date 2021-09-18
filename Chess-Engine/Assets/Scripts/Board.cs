@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Board {
-	private int[,] representation;
+	public int[,] representation;
 
 	private const int FILE_COUNT = 8;
 	private const int RANK_COUNT = 8;
@@ -24,8 +24,6 @@ public class Board {
 
 	MoveGenerator moveGenerator;
 
-	private bool isTestBoard = false;
-
 	private const int turnMask = 1;
 	private const int castlingMask = 30;
 	private const int enFileMask = 480;
@@ -38,25 +36,24 @@ public class Board {
 		this.gameStateHistory = new Stack<PositionState>();
 		this.representation = new int[RANK_COUNT, FILE_COUNT];
 		this.moveGenerator = new MoveGenerator();
-		this.moveGenerator.GenerateMoves(this);
 
 		for (int file = 0; file < FILE_COUNT; file++)
 			for (int rank = 0; rank < RANK_COUNT; rank++)
 				PlacePieceOnSquare(0, new Coord(rank, file));
 	}
 
-	public Board Clone(bool isTestBoard = false) {
+	public Board Clone() {
 		Board board = new Board();
 		board.GameState = this.GameState;
 		board.gameStateHistory = new Stack<PositionState>(new Stack<PositionState>(this.gameStateHistory));
 		board.representation = (int[,])this.representation.Clone();
-		board.isTestBoard = isTestBoard;
 
 		return board;
 	}
 
 	public void MakeMove(Move move) {
-		this.gameStateHistory.Push(new PositionState(this.GameState, this.representation));
+		Board board = this.Clone();
+		this.gameStateHistory.Push(new PositionState(board.GameState, board.representation));
 
 		Coord startSquare = new Coord(move.GetStartSquareIndex());
 		Coord targetSquare = new Coord(move.GetTargetSquareIndex());
@@ -138,13 +135,9 @@ public class Board {
 
 		SetWhiteMovesNext(!WhiteMovesNext());
 
-		if (!this.isTestBoard) {
-			SetFiftyMoveRuleCounter(GetFiftyMoveRuleCounter() + 1);
-			if (WhiteMovesNext())
-				SetMoveCounter(GetMoveCounter() + 1);
-
-			moveGenerator.GenerateMoves(this);
-		}
+		SetFiftyMoveRuleCounter(GetFiftyMoveRuleCounter() + 1);
+		if (WhiteMovesNext())
+			SetMoveCounter(GetMoveCounter() + 1);
 	}
 
 	public void UnmakeMove() {
@@ -236,6 +229,14 @@ public class Board {
 		return (this.GameState & fiftyMoveCounterMask) >> 12;
 	}
 
+	public void UpdateFiftyMoveRuleCounter(Move move) {
+
+		if (Piece.GetPieceType(move.GetStartSquareIndex()) == Piece.PieceType.Pawn
+			|| GetSquareContents(new Coord(move.GetTargetSquareIndex())) != 0) {
+			SetFiftyMoveRuleCounter(0);
+		}
+	}
+
 	public int GetMoveCounter() {
 		return (this.GameState & moveCountMask) >> 18;
 	}
@@ -273,7 +274,7 @@ public class Board {
 		} else
 			toReturn = $"{Piece.GetPieceTypeAbbreviation(this.GetSquareContents(new Coord(move.GetStartSquareIndex())))}{targetSquare}";
 
-		Board testBoard = this.Clone(true);
+		Board testBoard = this.Clone();
 		testBoard.MakeMove(move);
 		testBoard.moveGenerator.GenerateMoves(testBoard);
 

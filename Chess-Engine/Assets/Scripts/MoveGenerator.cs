@@ -10,10 +10,13 @@ public class MoveGenerator {
 	private static readonly int[] KING_MOVES = { 1, -7, -8, -9, -1, 7, 8, 9 };
 
 	public List<Move> moves;
+	public List<Coord> squaresAttackedByWhite = new List<Coord>();
+	public List<Coord> squaresAttackedByBlack = new List<Coord>();
 	Board board;
 
 	bool checkNextDepth;
 	bool whiteMovesNext;
+	bool hasGeneratedMoves = false;
 
 	public List<Move> GenerateMoves(Board board, bool checkNextDepth = true) {
 		this.board = board;
@@ -27,12 +30,26 @@ public class MoveGenerator {
 		GenerateBishopMoves();
 		GeneratePawnMoves();
 
+		if (IsCheckmate() || IsDraw())
+			return new List<Move>();
+
 		return moves;
 	}
 
 	private void Init() {
 		moves = new List<Move>(64);
 		whiteMovesNext = board.WhiteMovesNext();
+		if(whiteMovesNext)
+			squaresAttackedByWhite = new List<Coord>();
+		else
+			squaresAttackedByBlack = new List<Coord>();
+
+		if (!hasGeneratedMoves) {
+			hasGeneratedMoves = true;
+			whiteMovesNext = !whiteMovesNext;
+			this.GenerateMoves(board, false);
+			whiteMovesNext = !whiteMovesNext;
+		}
 	}
 
 	private void GeneratePawnMoves() {
@@ -220,7 +237,7 @@ public class MoveGenerator {
 
 		int king = kings[0];
 
-		Board testBoard = board.Clone(true);
+		Board testBoard = board.Clone();
 
 		testBoard.MakeMove(move);
 		MoveGenerator moveGenerator = new MoveGenerator();
@@ -275,11 +292,11 @@ public class MoveGenerator {
 				AddPawnMoveIfLegal(new Move(pawn, target));
 		}
 	}
-	public bool IsCheck() {
+	public bool IsCheck2() {
 		if (!checkNextDepth)
 			return false;
 
-		Board testBoard = board.Clone(true);
+		Board testBoard = board.Clone();
 
 		testBoard.SetWhiteMovesNext(!board.WhiteMovesNext());
 
@@ -292,6 +309,11 @@ public class MoveGenerator {
 		return false;
 	}
 
+	public bool IsCheck() {
+		Coord kingSquare = new Coord(board.GetPieceTypes(this.whiteMovesNext, Piece.PieceType.King)[0]);
+		return whiteMovesNext ? squaresAttackedByBlack.Contains(kingSquare) : squaresAttackedByWhite.Contains(kingSquare);
+	}
+
 	//TODO Add 3 fold reptition and insufficient material
 	// Insufficient material positions:
 	//	-king against king
@@ -299,9 +321,8 @@ public class MoveGenerator {
 	//	-king against king and knight
 	//	-king and bishop against king and bishop, with both bishops on squares of the same color
 	public bool IsDraw() {
-		return board.GetFiftyMoveRuleCounter() >= 50 || // FIfty Move Rile
-			(moves.Count == 0 && !IsCheck()) // Stalemate
-			;
+		return board.GetFiftyMoveRuleCounter() >= 100 || // Fifty Move Rule
+			(moves.Count == 0 && !IsCheck()); // Stalemate
 	}
 
 	public bool IsCheckmate() {

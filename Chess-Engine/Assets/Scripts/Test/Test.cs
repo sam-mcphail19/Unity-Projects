@@ -17,6 +17,7 @@ public class Test {
 
 	public bool RunTest() {
 		board = FenUtil.LoadPositionFromFenString(fen);
+		Debug.Log($"Loaded position: ${FenUtil.CurrentBoardPositionToFenString(board)}");
 
 		for (int i = 0; i < depth; i++) {
 			int nodesFound = Search(i + 1);
